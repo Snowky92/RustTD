@@ -6,13 +6,20 @@ use std::process::Command;
 use bevy::{prelude::*, transform, window};
 use bevy::window::PrimaryWindow;
 use rand::random;
+use Enemies::EnemiesPlugin;
+
+mod Enemies;
+pub const MAX_ENEMIES: f32 = 10.0;
+
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(EnemiesPlugin)
         .add_systems(Startup, spawn_camera)
         .run();
 }
+
 
 pub fn spawn_camera(
     mut commands: Commands,
