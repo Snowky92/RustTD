@@ -9,7 +9,6 @@ use rand::random;
 use Enemies::EnemiesPlugin;
 
 mod Enemies;
-pub const MAX_ENEMIES: f32 = 10.0;
 
 
 fn main() {

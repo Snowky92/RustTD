@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use std::time::Duration;
+
+use bevy::{prelude::*, time::common_conditions::on_timer};
 
 pub mod components;
 mod resources;
@@ -15,8 +17,21 @@ pub struct EnemiesPlugin;
 impl Plugin for EnemiesPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Startup, start_spawn_enemies)
+            // .add_systems(Startup, start_spawn_enemies)
+            .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(1))))
             .add_systems(Update, enemy_mov)
+            .add_systems(Update, despawn_enemies)
             ;            
     }
 }
+/*
+OBJ :
+ X  Spawn Enemies 
+ X      -> toutes les 3 secondes
+ X  Vont en ligne droite traverser l'écran 
+ X  Despawn si les enemis sortent de la fenêtre
+    Tourelle sur le chemin
+    Tire qd à portée 
+    Explose ennemis 
+        -> Fait perdre de la vie
+*/

@@ -5,7 +5,11 @@ use bevy::window::PrimaryWindow;
 use super::{ENEMY_SIZE, ENEMY_SPEED}; 
 use super::components::*;
 
-pub fn start_spawn_enemies(
+
+/**
+ * Fait spawn des ennemis
+ */
+pub fn spawn_enemies(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>
@@ -29,6 +33,9 @@ pub fn start_spawn_enemies(
     ));
 }
 
+/**
+ * Déplace les ennemis à chaque frame dans la direction où ils vont
+ */
 pub fn enemy_mov (
     mut enemy_query: Query<(&mut Transform, &Enemy)>,
     time: Res<Time>
@@ -37,4 +44,27 @@ pub fn enemy_mov (
         let direction = Vec3::new(enemy.direction.x, enemy.direction.y, 0.0);
         transform.translation += direction * ENEMY_SPEED * time.delta_seconds();
     }
+}
+
+/**
+ * Despawn les ennemies s'ils vont en dehors de la fenêtre
+ */
+pub fn despawn_enemies (
+    mut commands: Commands,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+) {
+    let window = window_query.get_single().unwrap();
+
+    for (enemy_entity, transform) in enemy_query.iter() {
+
+        if transform.translation.x > window.width() ||
+            transform.translation.x < 0.0 ||
+            transform.translation.y > window.height() ||
+            transform.translation.y < 0.0 {
+    
+            commands.entity(enemy_entity).despawn();
+        }  
+    }
+
 }
