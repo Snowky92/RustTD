@@ -18,7 +18,7 @@ pub fn spawn_enemies(
 
     commands.spawn((
         SpriteBundle {
-            transform: Transform::from_xyz(50.0, window.height() / 2.0, 0.0),
+            transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
             texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile270.png"),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(ENEMY_SIZE, ENEMY_SIZE)),
