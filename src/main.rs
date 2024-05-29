@@ -28,7 +28,7 @@ fn main() {
                 title: "RustTD".into(),
                 name: Some("bevy.app".into()),
                 resizable: false,
-                mode: WindowMode::Windowed,
+                mode: WindowMode::BorderlessFullscreen,
                 resolution: WindowResolution::new(1920.0, 1080.0).with_scale_factor_override(1.0),
                 ..default()
             }),
@@ -38,6 +38,7 @@ fn main() {
         .add_plugins(EnemiesPlugin)
         .add_plugins(TargetingPlugin)
         .add_systems(Startup, spawn_camera)
+        .add_systems(Startup, spawn_test_turret)
         .add_plugins(MapPlugin)
         .run();
 }
