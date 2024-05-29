@@ -17,3 +17,6 @@ impl Plugin for TurretPlugin {
             ;            
     }
 }
+
+pub const TURRET_SIZE: f32 = 50.0;
+pub const TURRET_REACH: f32 = 200.0;

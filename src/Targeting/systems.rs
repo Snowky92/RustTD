@@ -2,7 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::{prelude::*, transform::commands};
 
-use crate::{Enemies::{components::*, ENEMY_SPEED}, Turrets, TURRET_REACH, TURRET_SIZE};
+use crate::{Enemies::{components::*, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
 use super::{components::*, BULLET_SIZE};
 
 /**

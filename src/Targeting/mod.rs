@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::{prelude::*, time::common_conditions::on_timer};
 use systems::*;
 
-use crate::TURRET_SIZE;
+use crate::Turret::TURRET_SIZE;
 
 pub mod components;
 mod systems;
