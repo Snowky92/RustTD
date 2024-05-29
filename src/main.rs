@@ -34,29 +34,6 @@ pub fn spawn_camera(
     );
 }
 
-/* 
-pub fn spawn_grid(
-    mut commands: Commands,
-    window_query: Query<&Window, With<PrimaryWindow>>
-) {
-    let window = window_query.get_single().unwrap();
-    let cell_size = 50.0;
-
-    for y in (0..(window.height() as i32)).step_by(cell_size as usize) {
-        for x in (0..(window.width() as i32)).step_by(cell_size as usize) {
-            commands.spawn(SpriteBundle {
-                sprite: Sprite {
-                    color: Color::rgba(0.9, 0.9, 0.9, 0.5),
-                    custom_size: Some(Vec2::new(cell_size - 1.0, cell_size - 1.0)),
-                    ..default()
-                },
-                transform: Transform::from_translation(Vec3::new(x as f32, y as f32, 0.0)),
-                ..default()
-            });
-        }
-    }
-}
-*/
 pub fn handle_right_clicks(
     mut commands: Commands,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
@@ -69,7 +46,6 @@ pub fn handle_right_clicks(
             for (camera, camera_transform) in q_camera.iter() {
                 let window_size = Vec2::new(window.width() as f32, window.height() as f32);
                 let ndc = (cursor_position / window_size) * 2.0 - Vec2::ONE;
-
                 let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
                 let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
 
@@ -94,8 +70,8 @@ pub fn handle_left_clicks(
     mut commands: Commands,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    q_camera: Query<(&Camera, &GlobalTransform)>,
     query: Query<(Entity, &Transform, &Sprite), With<Clickable>>,
+    q_camera: Query<(&Camera, &GlobalTransform)>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Right) {
         let window = windows.get_single().unwrap();
@@ -103,22 +79,22 @@ pub fn handle_left_clicks(
             for (camera, camera_transform) in q_camera.iter() {
                 let window_size = Vec2::new(window.width() as f32, window.height() as f32);
                 let ndc = (cursor_position / window_size) * 2.0 - Vec2::ONE;
-
+                
                 let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
                 let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
-
+                
                 for (entity, transform, sprite) in query.iter() {
                     let sprite_pos = transform.translation;
                     let sprite_size = sprite.custom_size.unwrap();
                     let half_size = sprite_size / 2.0;
-
+                    
                     let min_bounds = sprite_pos - Vec3::new(half_size.x, half_size.y, 0.0);
                     let max_bounds = sprite_pos + Vec3::new(half_size.x, half_size.y, 0.0);
-
+                    
                     if world_position.x > min_bounds.x
-                        && world_position.x < max_bounds.x
-                        && world_position.y > min_bounds.y
-                        && world_position.y < max_bounds.y
+                    && world_position.x < max_bounds.x
+                    && world_position.y > min_bounds.y
+                    && world_position.y < max_bounds.y
                     {
                         commands.entity(entity).despawn();
                     }
@@ -127,4 +103,26 @@ pub fn handle_left_clicks(
         }
     }
 }
+/*
+pub fn spawn_grid(
+    mut commands: Commands,
+    window_query: Query<&Window, With<PrimaryWindow>>
+) {
+    let window = window_query.get_single().unwrap();
+    let cell_size = 50.0;
 
+    for y in (0..(window.height() as i32)).step_by(cell_size as usize) {
+        for x in (0..(window.width() as i32)).step_by(cell_size as usize) {
+            commands.spawn(SpriteBundle {
+                sprite: Sprite {
+                    color: Color::rgba(0.9, 0.9, 0.9, 0.5),
+                    custom_size: Some(Vec2::new(cell_size - 1.0, cell_size - 1.0)),
+                    ..default()
+                },
+                transform: Transform::from_translation(Vec3::new(x as f32, y as f32, 0.0)),
+                ..default()
+            });
+        }
+    }
+}
+*/
