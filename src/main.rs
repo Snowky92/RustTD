@@ -28,7 +28,7 @@ fn main() {
 
 pub fn spawn_camera(
     mut commands: Commands,
-    window_query: Query<&Window, With<PrimaryWindow>>
+    window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = window_query.get_single().unwrap();
 
@@ -46,7 +46,6 @@ pub const TURRET_REACH: f32 = 200.0;
 #[derive(Component)]
 pub struct Turret {
     pub dir_look: Vec3,
-    pub in_reach: bool
 }
 
 pub fn spawn_test_turret(
@@ -58,7 +57,7 @@ pub fn spawn_test_turret(
 ) {
     let window = window_query.get_single().unwrap();
 
-    let turret_x = window.width() / 2.0;
+    let turret_x = window.width() / 4.0 ;
     let turret_y = (window.height() / 2.0) + 100.0;
 
     commands.spawn((
@@ -72,8 +71,7 @@ pub fn spawn_test_turret(
             ..default()
         },
         Turret {
-            dir_look: Vec3::new(0.0, 1.0, 0.0),
-            in_reach: false,
+            dir_look: Vec3::new(0.0, 0.0, 0.0),
         }
     ));
 

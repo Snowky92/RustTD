@@ -9,7 +9,7 @@ mod systems;
 use resources::*;
 use systems::*;
 
-pub const ENEMY_SPEED: f32 = 200.0; // Enemy speed
+pub const ENEMY_SPEED: f32 = 50.0; // Enemy speed
 pub const ENEMY_SIZE: f32 = 50.0; 
 
 pub struct EnemiesPlugin;
@@ -30,7 +30,7 @@ OBJ :
  X  Vont en ligne droite traverser l'écran 
  X  Despawn si les enemis sortent de la fenêtre
  X  Tourelle sur le chemin
-    Tourelle traque l'ennemi le plus proche
+ X  Tourelle traque l'ennemi le plus proche
     Tire qd à portée 
     Explose ennemis 
         -> Fait perdre de la vie
