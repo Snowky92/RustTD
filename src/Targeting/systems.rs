@@ -2,7 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::{prelude::*, transform::commands};
 
-use crate::{Enemies::{components::*, ENEMY_SPEED}, Turret, TURRET_REACH, TURRET_SIZE};
+use crate::{Enemies::{components::*, ENEMY_SPEED}, Turrets, TURRET_REACH, TURRET_SIZE};
 use super::{components::*, BULLET_SIZE};
 
 /**
@@ -11,7 +11,7 @@ use super::{components::*, BULLET_SIZE};
 pub fn tracking_target(
     mut commands: Commands,
     enemies_query: Query<&Transform, With<Enemy>>,
-    mut turrets_query: Query<(Entity, &Transform, &mut Turret), With<Turret>>
+    mut turrets_query: Query<(Entity, &Transform, &mut Turrets), With<Turrets>>
 ) {
     for (turret_entity, turret_transform , mut turret) in turrets_query.iter_mut() {
         let mut direction: Vec3 = Vec3::ZERO;
@@ -43,7 +43,7 @@ pub fn tracking_target(
  * Fait tourner les tourelles à portée de tir
  */
 pub fn mov_turret(
-    mut turrets_query: Query<(&mut Transform, &Turret), (With<Turret>, With<InRange>)>
+    mut turrets_query: Query<(&mut Transform, &Turrets), (With<Turrets>, With<InRange>)>
 ) {
     for (mut turret_transform , turret) in turrets_query.iter_mut() {
         let direction = turret.dir_look - turret_transform.translation;
@@ -58,7 +58,7 @@ pub fn mov_turret(
  */
 pub fn shoot (
     mut commands: Commands,
-    turrets_query: Query<&Transform, (With<Turret>, With<InRange>)>,
+    turrets_query: Query<&Transform, (With<Turrets>, With<InRange>)>,
     asset_server: Res<AssetServer>,
 ) {
 
