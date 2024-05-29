@@ -23,7 +23,8 @@ pub fn handle_right_clicks(
                 
                 // let turret_x = window.width() / 4.0 ;
                 // let turret_y = (window.height() / 2.0) + 100.0;
-                commands.spawn((SpriteBundle {
+                commands.spawn((
+                    SpriteBundle {
                         transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
                         texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
                         sprite: Sprite {
@@ -37,15 +38,15 @@ pub fn handle_right_clicks(
                     },
                     Clickable,
                 ));
-                commands.spawn((MaterialMesh2dBundle {
-                    transform: Transform::from_xyz(world_position.x, world_position.y, 1.0),
-                    mesh: Mesh2dHandle(meshes.add( Circle { radius: TURRET_REACH })),
-                    material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
-                    ..default()
-
-                },
-                Clickable,
-            ));
+                commands.spawn((
+                    MaterialMesh2dBundle {
+                        transform: Transform::from_xyz(world_position.x, -world_position.y, 1.0),
+                        mesh: Mesh2dHandle(meshes.add( Circle { radius: TURRET_REACH })),
+                        material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
+                        ..default()
+                    },
+                    Clickable,
+                ));
             }
         }
     }
