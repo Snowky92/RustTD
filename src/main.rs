@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_imports)]
+#![allow(private_interfaces)]
 
 use std::process::Command;
 
@@ -9,8 +10,10 @@ use bevy::{prelude::*, transform, window};
 use rand::random;
 
 use Map::MapPlugin;
-
 mod Map;
+use Turret::TurretPlugin;
+mod Turret;
+
 
 fn main() {
     App::new()
@@ -25,6 +28,7 @@ fn main() {
             }),
             ..default()
         }))
+        .add_plugins(TurretPlugin)
         .add_systems(Startup, spawn_camera)
         .add_plugins(MapPlugin)
         .run();
