@@ -19,8 +19,8 @@ pub fn load_map(
             for (i, inner_vec) in map.cases.iter().enumerate() {
                 for (j, &value) in inner_vec.iter().enumerate() {                    
                     let tile_path = match value {
-                        0 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile038.png",
-                        1 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile040.png",
+                        0 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile065.png",
+                        1 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile067.png",
                         2 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile119.png",
                         3 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile093.png",
                         _ => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile093.png"
