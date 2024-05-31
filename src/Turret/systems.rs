@@ -1,5 +1,7 @@
 use bevy::{prelude::*, sprite::{MaterialMesh2dBundle, Mesh2dHandle}, window::PrimaryWindow};
 
+use crate::Turrets;
+
 use super::{components::*, TURRET_REACH, TURRET_SIZE};
 
 pub fn handle_right_clicks(

@@ -12,7 +12,7 @@ use rand::random;
 
 use Map::MapPlugin;
 mod Map;
-use Turret::TurretPlugin;
+use Turret::{TurretPlugin, TURRET_REACH, TURRET_SIZE};
 mod Turret;
 use Enemies::EnemiesPlugin;
 use Targeting::TargetingPlugin;
