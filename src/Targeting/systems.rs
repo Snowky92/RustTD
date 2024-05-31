@@ -2,7 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::{prelude::*, transform::commands};
 
-use crate::{Enemies::{components::*, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
+use crate::{DebugText, Enemies::{components::*, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
 use super::{components::*, BULLET_SIZE};
 
 /**
@@ -13,11 +13,11 @@ pub fn tracking_target(
     enemies_query: Query<&Transform, With<Enemy>>,
     mut turrets_query: Query<(Entity, &Transform, &mut Turrets), With<Turrets>>
 ) {
-    for (turret_entity, turret_transform , mut turret) in turrets_query.iter_mut() {
+    for (i , (turret_entity, turret_transform , mut turret)) in turrets_query.iter_mut().enumerate() {
         let mut direction: Vec3 = Vec3::ZERO;
         let mut closer: f32 = TURRET_REACH;
         let mut in_range = false;
-
+        
         for enemy_transform in enemies_query.iter() {
             let distance = enemy_transform.translation.distance(turret_transform.translation);
 
@@ -43,13 +43,17 @@ pub fn tracking_target(
  * Fait tourner les tourelles à portée de tir
  */
 pub fn mov_turret(
-    mut turrets_query: Query<(&mut Transform, &Turrets), (With<Turrets>, With<InRange>)>
+    mut turrets_query: Query<(&mut Transform, &Turrets), (With<Turrets>, With<InRange>)>,
+    mut text_query: Query<&mut Text, With<DebugText>>,
 ) {
     for (mut turret_transform , turret) in turrets_query.iter_mut() {
         let direction = turret.dir_look - turret_transform.translation;
-        let angle = direction.y.atan2(direction.x) - FRAC_PI_2; // Correction : rotation de 90° sinon elle montre le coté
+        let angle = direction.normalize().x.acos(); // Correction : rotation de 90° sinon elle montre le coté
 
         turret_transform.rotation = Quat::from_rotation_z(angle);
+
+        let mut text = text_query.get_single_mut().unwrap();
+        text.sections[0].value = format!("{:.2}", turret_transform.rotation.z.to_degrees());
     }
 }
 
@@ -67,13 +71,14 @@ pub fn shoot (
         // TODO : If turret cooldown 0
         
         // Calc vecteur de direction basé sur la rotation
-        let direction = Vec3::new(
-            f32::cos(turret_transform.rotation.z - FRAC_PI_2) * 1.0, 
-            f32::sin(turret_transform.rotation.z - FRAC_PI_2) * 1.0, 
+        let mut direction = Vec3::new(
+            turret_transform.rotation.z.to_radians().cos(), 
+            turret_transform.rotation.z.to_radians().sin(), 
             0.0
         );
+        direction = direction.normalize();
 
-        println!("{:?}{:?}{:?}", turret_transform.rotation.z, direction.x, direction.y); 
+        println!("z degrees: {:?}, x: {:?}, y:{:?}", turret_transform.rotation.z.to_degrees(), direction.x, direction.y); 
 
         commands.spawn((
             SpriteBundle {

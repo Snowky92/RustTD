@@ -9,7 +9,7 @@ mod systems;
 use resources::*;
 use systems::*;
 
-pub const ENEMY_SPEED: f32 = 50.0; // Enemy speed
+pub const ENEMY_SPEED: f32 = 70.0; // Enemy speed
 pub const ENEMY_SIZE: f32 = 50.0; 
 
 pub struct EnemiesPlugin;
@@ -17,7 +17,7 @@ pub struct EnemiesPlugin;
 impl Plugin for EnemiesPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(1))))
+            .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(3))))
             .add_systems(Update, enemy_mov)
             .add_systems(Update, despawn_enemies)
             ;            
