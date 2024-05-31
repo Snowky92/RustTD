@@ -20,9 +20,7 @@ pub fn handle_right_clicks(
                 let ndc = (cursor_position / window_size) * 2.0 - Vec2::ONE;
                 let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
                 let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
-                
-                // let turret_x = window.width() / 4.0 ;
-                // let turret_y = (window.height() / 2.0) + 100.0;
+
                 commands.spawn((
                     SpriteBundle {
                         transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
@@ -40,7 +38,7 @@ pub fn handle_right_clicks(
                 ));
                 commands.spawn((
                     MaterialMesh2dBundle {
-                        transform: Transform::from_xyz(world_position.x, -world_position.y, 1.0),
+                        transform: Transform::from_xyz(world_position.x, world_position.y, 1.0),
                         mesh: Mesh2dHandle(meshes.add( Circle { radius: TURRET_REACH })),
                         material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
                         ..default()
