@@ -3,7 +3,7 @@ use std::f32::consts::FRAC_PI_2;
 use bevy::{prelude::*, transform::commands, window::PrimaryWindow};
 
 use crate::{DebugText, Enemies::{components::*, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
-use super::{components::*, BULLET_SIZE};
+use super::{components::*, BULLET_SIZE, BULLET_SPEED};
 
 /**
  * Regarde si les tourelles sont à portée et désigne leurs cibles
@@ -44,17 +44,16 @@ pub fn tracking_target(
  */
 pub fn mov_turret(
     mut turrets_query: Query<(&mut Transform, &Turrets), (With<Turrets>, With<InRange>)>,
-    mut text_query: Query<&mut Text, With<DebugText>>,
+    // mut text_query: Query<&mut Text, With<DebugText>>,
 ) {
     for (mut turret_transform , turret) in turrets_query.iter_mut() {
         let direction = turret.dir_look - turret_transform.translation;
         let angle = direction.normalize().x.acos(); // Correction : rotation de 90° sinon elle montre le coté
 
         turret_transform.rotation = Quat::from_rotation_z(angle);
-        println!("rotation after mov : {:?}", turret_transform.rotation);
 
-        let mut text = text_query.get_single_mut().unwrap();
-        text.sections[0].value = format!("{:.2}", turret_transform.rotation.z.to_degrees());
+        // let mut text = text_query.get_single_mut().unwrap();
+        // text.sections[0].value = format!("{:.2}", turret_transform.rotation.z.to_degrees());
     }
 }
 
@@ -72,14 +71,13 @@ pub fn shoot (
         // TODO : If turret cooldown 0
         
         // Calc vecteur de direction basé sur la rotation
-        let mut direction = Vec3::new(
-            turret_transform.rotation.z.to_radians().cos(), 
-            turret_transform.rotation.z.to_radians().sin(), 
+        let theta = 2.0 * turret_transform.rotation.z.atan2(turret_transform.rotation.w);
+        let mut direction = Vec3::new( 
+            theta.cos(), 
+            theta.sin(), 
             0.0
         );
         direction = direction.normalize();
-
-        println!("z degrees: {:?}, x: {:?}, y:{:?}", turret_transform.rotation.z.to_degrees(), direction.x, direction.y); 
 
         commands.spawn((
             SpriteBundle {
@@ -89,7 +87,7 @@ pub fn shoot (
                         turret_transform.translation.y + (direction.y * (TURRET_SIZE / 2.0)), 
                         turret_transform.translation.z + 1.0
                     ),
-                    rotation: Quat::from_rotation_z(turret_transform.rotation.z ),
+                    rotation: Quat::from_rotation_z(theta),
                     ..default()
                 },
                 texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile251.png"),
@@ -119,7 +117,7 @@ pub fn mov_bullets (
     
     for (entity, mut transform, bullet) in bullets_query.iter_mut() {
         let direction = bullet.direction;
-        transform.translation += direction * (ENEMY_SPEED * 1.0) * time.delta_seconds();
+        transform.translation += direction * BULLET_SPEED * time.delta_seconds();
 
         // Despawn les projectiles s'ils vont en dehors de la fenêtre
         if transform.translation.x > window.width() ||
