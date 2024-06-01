@@ -30,7 +30,7 @@ OBJ :
  X  Despawn si les enemis sortent de la fenêtre
  X  Tourelle sur le chemin
  X  Tourelle traque l'ennemi le plus proche
-    Tire qd à portée 
-    Explose ennemis 
+ X  Tire qd à portée 
+ X  Explose ennemis 
         -> Fait perdre de la vie
 */

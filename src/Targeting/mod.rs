@@ -19,6 +19,7 @@ impl Plugin for TargetingPlugin {
             .add_systems(Update, (tracking_target, mov_turret).chain())
             .add_systems(Update, shoot.run_if(on_timer(Duration::from_millis(700))))
             .add_systems(Update, mov_bullets)
+            .add_systems(Update, kill_enemies)
             ;            
     }
 }

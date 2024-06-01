@@ -1,8 +1,8 @@
 use std::f32::consts::FRAC_PI_2;
 
-use bevy::{prelude::*, transform::commands, window::PrimaryWindow};
+use bevy::{ecs::entity, prelude::*, transform::commands, window::PrimaryWindow};
 
-use crate::{DebugText, Enemies::{components::*, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
+use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
 use super::{components::*, BULLET_SIZE, BULLET_SPEED};
 
 /**
@@ -127,5 +127,30 @@ pub fn mov_bullets (
     
             commands.entity(entity).despawn();
         } 
+    }
+}
+
+
+pub fn kill_enemies (
+    mut commands: Commands,
+    bullets_query: Query<(Entity, &Transform), With<Bullet>>,
+    enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+) {
+
+    for (bullet_entity, &bullet_transform) in bullets_query.iter() {
+        for (enemy_entity, &enemy_transform) in enemy_query.iter() {
+
+            let distance = bullet_transform.translation.distance(enemy_transform.translation);
+
+            let bullet_radius = BULLET_SIZE / 2.0;
+            let enemy_radius = ENEMY_SIZE / 2.0;
+
+            // Si la distance est inférieur à leur 2 rayons, ils se touchent
+            if distance < bullet_radius + enemy_radius {
+                commands.entity(enemy_entity).despawn();
+                commands.entity(bullet_entity).despawn();
+
+            }
+        }
     }
 }
