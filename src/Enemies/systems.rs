@@ -37,34 +37,24 @@ pub fn spawn_enemies(
  * Déplace les ennemis à chaque frame dans la direction où ils vont
  */
 pub fn enemy_mov (
-    mut enemy_query: Query<(&mut Transform, &Enemy)>,
-    time: Res<Time>
-) {
-    for (mut transform, enemy) in enemy_query.iter_mut() {
-        let direction = Vec3::new(enemy.direction.x, enemy.direction.y, 0.0);
-        transform.translation += direction * ENEMY_SPEED * time.delta_seconds();
-    }
-}
-
-/**
- * Despawn les ennemies s'ils vont en dehors de la fenêtre
- */
-pub fn despawn_enemies (
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+    mut enemy_query: Query<(Entity, &mut Transform, &Enemy)>,
+    time: Res<Time>
 ) {
     let window = window_query.get_single().unwrap();
 
-    for (enemy_entity, transform) in enemy_query.iter() {
+    for (entity, mut transform, enemy) in enemy_query.iter_mut() {
+        let direction = Vec3::new(enemy.direction.x, enemy.direction.y, 0.0);
+        transform.translation += direction * ENEMY_SPEED * time.delta_seconds();
 
+        // Despawn les ennemies s'ils vont en dehors de la fenêtre
         if transform.translation.x > window.width() ||
             transform.translation.x < 0.0 ||
             transform.translation.y > window.height() ||
             transform.translation.y < 0.0 {
     
-            commands.entity(enemy_entity).despawn();
+            commands.entity(entity).despawn();
         }  
     }
-
 }

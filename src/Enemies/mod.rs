@@ -19,7 +19,6 @@ impl Plugin for EnemiesPlugin {
         app
             .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(3))))
             .add_systems(Update, enemy_mov)
-            .add_systems(Update, despawn_enemies)
             ;            
     }
 }

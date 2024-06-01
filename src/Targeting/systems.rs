@@ -1,6 +1,6 @@
 use std::f32::consts::FRAC_PI_2;
 
-use bevy::{prelude::*, transform::commands};
+use bevy::{prelude::*, transform::commands, window::PrimaryWindow};
 
 use crate::{DebugText, Enemies::{components::*, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
 use super::{components::*, BULLET_SIZE};
@@ -51,6 +51,7 @@ pub fn mov_turret(
         let angle = direction.normalize().x.acos(); // Correction : rotation de 90° sinon elle montre le coté
 
         turret_transform.rotation = Quat::from_rotation_z(angle);
+        println!("rotation after mov : {:?}", turret_transform.rotation);
 
         let mut text = text_query.get_single_mut().unwrap();
         text.sections[0].value = format!("{:.2}", turret_transform.rotation.z.to_degrees());
@@ -109,11 +110,24 @@ pub fn shoot (
  * Déplace toutes les balles vers leur direction
  */
 pub fn mov_bullets (
-    mut bullets_query: Query<(&mut Transform, &Bullet), With<Bullet>>,
+    mut commands: Commands,
+    window_query: Query<&Window, With<PrimaryWindow>>,
+    mut bullets_query: Query<(Entity, &mut Transform, &Bullet), With<Bullet>>,
     time: Res<Time>
 ) {
-    for (mut transform, bullet) in bullets_query.iter_mut() {
+    let window = window_query.get_single().unwrap();
+    
+    for (entity, mut transform, bullet) in bullets_query.iter_mut() {
         let direction = bullet.direction;
         transform.translation += direction * (ENEMY_SPEED * 1.0) * time.delta_seconds();
+
+        // Despawn les projectiles s'ils vont en dehors de la fenêtre
+        if transform.translation.x > window.width() ||
+            transform.translation.x < 0.0 ||
+            transform.translation.y > window.height() ||
+            transform.translation.y < 0.0 {
+    
+            commands.entity(entity).despawn();
+        } 
     }
 }
