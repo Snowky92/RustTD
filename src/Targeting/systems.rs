@@ -2,7 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::{ecs::entity, prelude::*, transform::commands, window::PrimaryWindow};
 
-use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{components::Turrets, BULLET_DAMAGE_F, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
+use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{self, components::Turrets, BULLET_DAMAGE_F, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
 use super::{components::*, BULLET_SIZE};
 
 /**
@@ -63,11 +63,11 @@ pub fn mov_turret(
  */
 pub fn shoot (
     mut commands: Commands,
-    turrets_query: Query<(&Transform, Entity), (With<Turrets>, With<InRange>, Without<InCooldown>)>,
+    turrets_query: Query<(&Transform, Entity, &Turrets), (With<Turrets>, With<InRange>, Without<InCooldown>)>,
     asset_server: Res<AssetServer>,
 ) {
 
-    for (turret_transform, turret_entity) in turrets_query.iter() {
+    for (turret_transform, turret_entity, turret) in turrets_query.iter() {
 
         // Calc vecteur de direction basé sur la rotation
         // let theta = 2.0 * turret_transform.rotation.z.atan2(turret_transform.rotation.w);
@@ -99,8 +99,8 @@ pub fn shoot (
             },
             Bullet {
                 direction: direction,
-                speed: BULLET_SPEED_F,
-                damage: BULLET_DAMAGE_F
+                speed: turret.b_speed,
+                damage: turret.b_damage
             }
         ));
 

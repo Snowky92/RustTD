@@ -13,7 +13,7 @@ use rand::random;
 use Map::MapPlugin;
 mod Map;
 use Turret::components::Turrets;
-use Turret::{TurretPlugin, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
+use Turret::{TurretPlugin, BULLET_DAMAGE_F, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
 mod Turret;
 use Enemies::EnemiesPlugin;
 use Targeting::TargetingPlugin;
@@ -54,6 +54,8 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
     });
 }
 
+
+
 // #[derive(Component)]
 // pub struct Turrets {
 //     pub dir_look: Vec3,
@@ -77,7 +79,7 @@ pub fn spawn_test_turret(
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_xyz(turret_x, turret_y, 2.0),
-            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
+            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
                 ..default()
@@ -89,7 +91,8 @@ pub fn spawn_test_turret(
             b_speed: BULLET_SPEED_F,
             cooldown: COOLDOWN_F,
             cooldown_max: COOLDOWN_F,
-            reach: REACH_F
+            reach: REACH_F,
+            b_damage: BULLET_DAMAGE_F
         }
     ));
 

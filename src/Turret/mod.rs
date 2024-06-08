@@ -14,8 +14,10 @@ pub struct TurretPlugin;
 impl Plugin for TurretPlugin {
     fn build(&self, app: &mut App) {
         app
+            .init_resource::<TogglesTurrets>()
             .add_systems(Update, handle_right_clicks)
             .add_systems(Update, handle_left_clicks)
+            .add_systems(Update, handle_turret_toggle)
             ;
     }
 }
