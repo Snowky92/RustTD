@@ -12,7 +12,8 @@ use rand::random;
 
 use Map::MapPlugin;
 mod Map;
-use Turret::{TurretPlugin, TURRET_REACH, TURRET_SIZE};
+use Turret::components::Turrets;
+use Turret::{TurretPlugin, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
 mod Turret;
 use Enemies::EnemiesPlugin;
 use Targeting::TargetingPlugin;
@@ -53,10 +54,10 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
     });
 }
 
-#[derive(Component)]
-pub struct Turrets {
-    pub dir_look: Vec3,
-}
+// #[derive(Component)]
+// pub struct Turrets {
+//     pub dir_look: Vec3,
+// }
 
 #[derive(Component)]
 pub struct DebugText;
@@ -85,12 +86,16 @@ pub fn spawn_test_turret(
         },
         Turrets {
             dir_look: Vec3::new(0.0, 0.0, 0.0),
+            b_speed: BULLET_SPEED_F,
+            cooldown: COOLDOWN_F,
+            cooldown_max: COOLDOWN_F,
+            reach: REACH_F
         }
     ));
 
     commands.spawn(MaterialMesh2dBundle {
         transform: Transform::from_xyz(turret_x, turret_y, 0.0),
-        mesh: Mesh2dHandle(meshes.add( Circle { radius: TURRET_REACH })),
+        mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
         material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
         ..default()
     });

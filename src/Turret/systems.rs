@@ -1,6 +1,7 @@
 use bevy::{prelude::*, sprite::{MaterialMesh2dBundle, Mesh2dHandle}, window::PrimaryWindow};
 
-use super::{components::*, TURRET_REACH, TURRET_SIZE};
+
+use super::{components::*, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
 
 pub fn handle_right_clicks(
     mut commands: Commands,
@@ -21,30 +22,42 @@ pub fn handle_right_clicks(
                 let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
                 let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
 
-                commands.spawn((
-                    SpriteBundle {
-                        transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
-                        texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
-                        sprite: Sprite {
-                            custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                const DEBUG: bool = true;
+
+                if true {
+                    commands.spawn((
+                        SpriteBundle {
+                            transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
+                            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
+                            sprite: Sprite {
+                                custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                                ..default()
+                            },
                             ..default()
                         },
-                        ..default()
-                    },
-                    Turrets {
-                        dir_look: Vec3::new(0.0, 0.0, 0.0),
-                    },
-                    Clickable,
-                ));
-                commands.spawn((
-                    MaterialMesh2dBundle {
-                        transform: Transform::from_xyz(world_position.x, world_position.y, 1.0),
-                        mesh: Mesh2dHandle(meshes.add( Circle { radius: TURRET_REACH })),
-                        material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
-                        ..default()
-                    },
-                    Clickable,
-                ));
+                        Turrets {
+                            dir_look: Vec3::new(0.0, 0.0, 0.0),
+                            b_speed: BULLET_SPEED_F,
+                            cooldown: COOLDOWN_F,
+                            cooldown_max: COOLDOWN_F,
+                            reach: REACH_F
+                        },
+                        Clickable,
+                        Tfast
+                    ));
+
+                    if DEBUG {
+                        commands.spawn((
+                            MaterialMesh2dBundle {
+                                transform: Transform::from_xyz(world_position.x, world_position.y, 1.0),
+                                mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
+                                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
+                                ..default()
+                            },
+                            Clickable,
+                        ));
+                    }
+                }
             }
         }
     }

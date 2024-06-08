@@ -7,3 +7,7 @@ pub struct InRange;
 pub struct Bullet {
     pub direction: Vec3
 }
+
+#[derive(Component)]
+pub struct InCooldown;
+

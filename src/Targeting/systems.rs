@@ -2,8 +2,8 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::{ecs::entity, prelude::*, transform::commands, window::PrimaryWindow};
 
-use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{TURRET_REACH, TURRET_SIZE}, Turrets};
-use super::{components::*, BULLET_SIZE, BULLET_SPEED};
+use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{components::Turrets, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
+use super::{components::*, BULLET_SIZE};
 
 /**
  * Regarde si les tourelles sont à portée et désigne leurs cibles
@@ -15,7 +15,7 @@ pub fn tracking_target(
 ) {
     for (i , (turret_entity, turret_transform , mut turret)) in turrets_query.iter_mut().enumerate() {
         let mut direction: Vec3 = Vec3::ZERO;
-        let mut closer: f32 = TURRET_REACH;
+        let mut closer: f32 = REACH_F;
         let mut in_range = false;
         
         for enemy_transform in enemies_query.iter() {
@@ -29,7 +29,7 @@ pub fn tracking_target(
 
         }
 
-        if in_range && closer < TURRET_REACH {
+        if in_range && closer < REACH_F {
             turret.dir_look = direction;
 
             commands.entity(turret_entity).insert(InRange);
@@ -48,7 +48,7 @@ pub fn mov_turret(
 ) {
     for (mut turret_transform , turret) in turrets_query.iter_mut() {
         let direction = turret.dir_look - turret_transform.translation;
-        let angle = direction.normalize().x.acos(); // Correction : rotation de 90° sinon elle montre le coté
+        let angle = direction.y.atan2(direction.x);
 
         turret_transform.rotation = Quat::from_rotation_z(angle);
 
@@ -62,19 +62,18 @@ pub fn mov_turret(
  */
 pub fn shoot (
     mut commands: Commands,
-    turrets_query: Query<&Transform, (With<Turrets>, With<InRange>)>,
+    turrets_query: Query<(&Transform, Entity), (With<Turrets>, With<InRange>, Without<InCooldown>)>,
     asset_server: Res<AssetServer>,
 ) {
 
-    for turret_transform in turrets_query.iter() {
+    for (turret_transform, turret_entity) in turrets_query.iter() {
 
-        // TODO : If turret cooldown 0
-        
         // Calc vecteur de direction basé sur la rotation
-        let theta = 2.0 * turret_transform.rotation.z.atan2(turret_transform.rotation.w);
+        // let theta = 2.0 * turret_transform.rotation.z.atan2(turret_transform.rotation.w);
+        let angle_z = turret_transform.rotation.to_euler(EulerRot::ZXY).0;
         let mut direction = Vec3::new( 
-            theta.cos(), 
-            theta.sin(), 
+            angle_z.cos(), 
+            angle_z.sin(), 
             0.0
         );
         direction = direction.normalize();
@@ -87,7 +86,7 @@ pub fn shoot (
                         turret_transform.translation.y + (direction.y * (TURRET_SIZE / 2.0)), 
                         turret_transform.translation.z + 1.0
                     ),
-                    rotation: Quat::from_rotation_z(theta),
+                    rotation: Quat::from_rotation_z(angle_z),
                     ..default()
                 },
                 texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile251.png"),
@@ -101,6 +100,8 @@ pub fn shoot (
                 direction: direction
             }
         ));
+
+        commands.entity(turret_entity).insert(InCooldown);
     }
 }
 
@@ -117,7 +118,7 @@ pub fn mov_bullets (
     
     for (entity, mut transform, bullet) in bullets_query.iter_mut() {
         let direction = bullet.direction;
-        transform.translation += direction * BULLET_SPEED * time.delta_seconds();
+        transform.translation += direction * BULLET_SPEED_F * time.delta_seconds();
 
         // Despawn les projectiles s'ils vont en dehors de la fenêtre
         if transform.translation.x > window.width() ||
@@ -151,6 +152,22 @@ pub fn kill_enemies (
                 commands.entity(bullet_entity).despawn();
 
             }
+        }
+    }
+}
+
+
+pub fn handle_cooldown(
+    mut commands: Commands,
+    mut turrets_query: Query<(&mut Turrets, Entity), (With<Turrets>, With<InCooldown>)>,
+    time: Res<Time>,
+) {
+    for (mut turret, turret_entity) in turrets_query.iter_mut() {
+        if turret.cooldown <= 0.0 {
+            commands.entity(turret_entity).remove::<InCooldown>();
+            turret.cooldown = turret.cooldown_max;
+        } else {
+            turret.cooldown -= time.delta_seconds();
         }
     }
 }
