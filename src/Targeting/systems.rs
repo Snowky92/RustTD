@@ -13,7 +13,7 @@ pub fn tracking_target(
     enemies_query: Query<&Transform, With<Enemy>>,
     mut turrets_query: Query<(Entity, &Transform, &mut Turrets), With<Turrets>>
 ) {
-    for (i , (turret_entity, turret_transform , mut turret)) in turrets_query.iter_mut().enumerate() {
+    for (turret_entity, turret_transform , mut turret) in turrets_query.iter_mut() {
         let mut direction: Vec3 = Vec3::ZERO;
         let mut closer: f32 = REACH_F;
         let mut in_range = false;
@@ -22,14 +22,15 @@ pub fn tracking_target(
             let distance = enemy_transform.translation.distance(turret_transform.translation);
 
             if closer > distance {
+                // Si l'ennemi est à portée de la tourelle, et est le plus proche
                 closer = distance;
                 direction = enemy_transform.translation;
                 in_range = true;
             }
-
         }
 
         if in_range && closer < REACH_F {
+            // S'il y avait un ennemi à portée
             turret.dir_look = direction;
 
             commands.entity(turret_entity).insert(InRange);
@@ -139,7 +140,6 @@ pub fn hit_enemies (
     bullets_query: Query<(Entity, &Transform, &Bullet), With<Bullet>>,
     mut enemy_query: Query<(Entity, &Transform, &mut Enemy), With<Enemy>>,
 ) {
-
     for (bullet_entity, &bullet_transform, bullet) in bullets_query.iter() {
         for (enemy_entity, &enemy_transform, mut enemy) in enemy_query.iter_mut() {
 
@@ -158,7 +158,7 @@ pub fn hit_enemies (
                     // Boum
                     commands.entity(enemy_entity).despawn();
                 }
-
+                break;
             }
         }
     }

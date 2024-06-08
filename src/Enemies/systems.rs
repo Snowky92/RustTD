@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy::render::view::window;
 use bevy::window::PrimaryWindow;
+use rand::random;
 
-use super::{ENEMY_PV, ENEMY_SIZE, ENEMY_SPEED}; 
+use super::{Difficulty, ENEMY_PV_1, ENEMY_PV_2, ENEMY_SIZE, ENEMY_SPEED, ENEMY_SPEED_1, ENEMY_SPEED_2}; 
 use super::components::*;
 
 
@@ -12,26 +13,52 @@ use super::components::*;
 pub fn spawn_enemies(
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
+    mut difficulty: ResMut<Difficulty>, 
 ) {
     let window = window_query.get_single().unwrap();
 
-    commands.spawn((
-        SpriteBundle {
-            transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
-            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile245.png"),
-            sprite: Sprite {
-                custom_size: Some(Vec2::new(ENEMY_SIZE, ENEMY_SIZE)),
+    let random = random::<f32>() * 100.0; // Random 0 à 100
+
+    if random > difficulty.level as f32 {
+        // Spawn ennemi n1
+        commands.spawn((
+            SpriteBundle {
+                transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
+                texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile245.png"),
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(ENEMY_SIZE, ENEMY_SIZE)),
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },
-        Enemy {
-            e_type: 0,
-            direction: Vec2::new(1.0, 0.0),
-            pv: ENEMY_PV
-        }
-    ));
+            Enemy {
+                direction: Vec2::new(1.0, 0.0),
+                pv: ENEMY_PV_1,
+                speed: ENEMY_SPEED_1,
+            }
+        ));
+    } else {
+        // Spawn ennemi n2
+        commands.spawn((
+            SpriteBundle {
+                transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
+                texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile246.png"),
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(ENEMY_SIZE, ENEMY_SIZE)),
+                    ..default()
+                },
+                ..default()
+            },
+            Enemy {
+                direction: Vec2::new(1.0, 0.0),
+                pv: ENEMY_PV_2,
+                speed: ENEMY_SPEED_2,
+            }
+        ));
+    }
+
+    difficulty.level += 1;
 }
 
 /**
@@ -47,7 +74,7 @@ pub fn enemy_mov (
 
     for (entity, mut transform, enemy) in enemy_query.iter_mut() {
         let direction = Vec3::new(enemy.direction.x, enemy.direction.y, 0.0);
-        transform.translation += direction * ENEMY_SPEED * time.delta_seconds();
+        transform.translation += direction * enemy.speed * time.delta_seconds();
 
         // Despawn les ennemies s'ils vont en dehors de la fenêtre
         if transform.translation.x > window.width() ||

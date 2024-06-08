@@ -16,7 +16,7 @@ impl Plugin for TurretPlugin {
         app
             .add_systems(Update, handle_right_clicks)
             .add_systems(Update, handle_left_clicks)
-            ;            
+            ;
     }
 }
 

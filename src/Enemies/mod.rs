@@ -12,14 +12,20 @@ use systems::*;
 pub const ENEMY_SPEED: f32 = 200.0; // Enemy speed
 pub const ENEMY_SIZE: f32 = 60.0; 
 
-pub const ENEMY_PV: f32 = 100.0;
+pub const ENEMY_PV_1: f32 = 100.0;
+pub const ENEMY_SPEED_1: f32 = 100.0;
+pub const ENEMY_PV_2: f32 = 200.0;
+pub const ENEMY_SPEED_2: f32 = 50.0;
+
+
 
 pub struct EnemiesPlugin;
 
 impl Plugin for EnemiesPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(2))))
+            .init_resource::<Difficulty>()
+            .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(1))))
             .add_systems(Update, enemy_mov)
             ;            
     }
@@ -34,5 +40,5 @@ OBJ :
  X  Tourelle traque l'ennemi le plus proche
  X  Tire qd à portée 
  X  Explose ennemis 
-        -> Fait perdre de la vie
+ X      -> Fait perdre de la vie
 */

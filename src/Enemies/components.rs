@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Enemy {
-    pub e_type: u32,
     pub direction: Vec2,
-    pub pv: f32
+    pub pv: f32,
+    pub speed: f32,
 }
