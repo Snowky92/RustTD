@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::render::view::window;
 use bevy::window::PrimaryWindow;
 
-use super::{ENEMY_SIZE, ENEMY_SPEED}; 
+use super::{ENEMY_PV, ENEMY_SIZE, ENEMY_SPEED}; 
 use super::components::*;
 
 
@@ -19,7 +19,7 @@ pub fn spawn_enemies(
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
-            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile270.png"),
+            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile245.png"),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(ENEMY_SIZE, ENEMY_SIZE)),
                 ..default()
@@ -29,6 +29,7 @@ pub fn spawn_enemies(
         Enemy {
             e_type: 0,
             direction: Vec2::new(1.0, 0.0),
+            pv: ENEMY_PV
         }
     ));
 }

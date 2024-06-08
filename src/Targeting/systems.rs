@@ -2,7 +2,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::{ecs::entity, prelude::*, transform::commands, window::PrimaryWindow};
 
-use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{components::Turrets, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
+use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{components::Turrets, BULLET_DAMAGE_F, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
 use super::{components::*, BULLET_SIZE};
 
 /**
@@ -82,8 +82,8 @@ pub fn shoot (
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(
-                        turret_transform.translation.x + (direction.x * (TURRET_SIZE / 2.0)),   // Décalage pour faire sortir la balle du canon
-                        turret_transform.translation.y + (direction.y * (TURRET_SIZE / 2.0)), 
+                        turret_transform.translation.x + (direction.x * (TURRET_SIZE / 3.0)),   // Décalage pour faire sortir la balle du canon
+                        turret_transform.translation.y + (direction.y * (TURRET_SIZE / 3.0)), 
                         turret_transform.translation.z + 1.0
                     ),
                     rotation: Quat::from_rotation_z(angle_z),
@@ -97,7 +97,9 @@ pub fn shoot (
                 ..default()
             },
             Bullet {
-                direction: direction
+                direction: direction,
+                speed: BULLET_SPEED_F,
+                damage: BULLET_DAMAGE_F
             }
         ));
 
@@ -132,14 +134,14 @@ pub fn mov_bullets (
 }
 
 
-pub fn kill_enemies (
+pub fn hit_enemies (
     mut commands: Commands,
-    bullets_query: Query<(Entity, &Transform), With<Bullet>>,
-    enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+    bullets_query: Query<(Entity, &Transform, &Bullet), With<Bullet>>,
+    mut enemy_query: Query<(Entity, &Transform, &mut Enemy), With<Enemy>>,
 ) {
 
-    for (bullet_entity, &bullet_transform) in bullets_query.iter() {
-        for (enemy_entity, &enemy_transform) in enemy_query.iter() {
+    for (bullet_entity, &bullet_transform, bullet) in bullets_query.iter() {
+        for (enemy_entity, &enemy_transform, mut enemy) in enemy_query.iter_mut() {
 
             let distance = bullet_transform.translation.distance(enemy_transform.translation);
 
@@ -148,8 +150,14 @@ pub fn kill_enemies (
 
             // Si la distance est inférieur à leur 2 rayons, ils se touchent
             if distance < bullet_radius + enemy_radius {
-                commands.entity(enemy_entity).despawn();
+                // Touché !
+                enemy.pv -= bullet.damage;
                 commands.entity(bullet_entity).despawn();
+
+                if enemy.pv <= 0.0 {
+                    // Boum
+                    commands.entity(enemy_entity).despawn();
+                }
 
             }
         }

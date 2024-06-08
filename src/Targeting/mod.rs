@@ -19,7 +19,7 @@ impl Plugin for TargetingPlugin {
             .add_systems(Update, (tracking_target, mov_turret).chain())
             .add_systems(Update, (shoot, handle_cooldown).chain())
             .add_systems(Update, mov_bullets)
-            // .add_systems(Update, kill_enemies)
+            .add_systems(Update, hit_enemies)
             ;            
     }
 }
