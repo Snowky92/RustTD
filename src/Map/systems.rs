@@ -14,10 +14,23 @@ pub fn load_map(
     asset_server: Res<AssetServer>
 ) {
     let file_path = "map.json";
+    let mut start = (0.0, 0.0);
+    let mut end = (0.0, 0.0);
     match read_json_file(file_path) {
         Ok(map) => {
             for (i, inner_vec) in map.cases.iter().enumerate() {
-                for (j, &value) in inner_vec.iter().enumerate() {                    
+                for (j, &value) in inner_vec.iter().enumerate() { 
+
+                    // Si point de départ
+                    if value == 0 {
+                        start = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
+                    }
+
+                    // Si point de fin
+                    if value == 1 {
+                        end = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
+                    }
+                                       
                     let tile_path = match value {
                         0 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile065.png",
                         1 => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile067.png",
@@ -34,7 +47,12 @@ pub fn load_map(
                         ..default()
                     });
                 }
-            }
+            };
+
+            commands.spawn(Points {
+                start,
+                end
+            });
         },
         Err(e) => println!("Error reading JSON file: {}", e)
     }
