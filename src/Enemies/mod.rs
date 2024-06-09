@@ -34,7 +34,6 @@ impl<S: States> Plugin for EnemiesPlugin<S> {
             .add_systems(Startup, detect_count_init)
             .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(1))).run_if(in_state(self.state.clone())))
             .add_systems(Update, enemy_mov.run_if(in_state(self.state.clone())))
-            .add_systems(Update, despawn_enemies.run_if(in_state(self.state.clone())))
             .add_systems(Update, detect_enemy_endzone)
             ;            
     }

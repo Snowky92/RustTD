@@ -101,20 +101,6 @@ pub fn spawn_enemies(
 }
 
 /**
- * Déplace les ennemis à chaque frame dans la direction où ils vont
- */
-pub fn enemy_mov (
-    mut enemy_query: Query<(&mut Transform, &Enemy)>,
-    time: Res<Time>
-) {
-    for (mut transform, enemy) in enemy_query.iter_mut() {
-        let direction = Vec3::new(enemy.direction.x, enemy.direction.y, 0.0);
-        transform.translation += direction * ENEMY_SPEED * time.delta_seconds();
-    }
-}
-
-
-/**
  * Permet de supprimer l'ennemi qui a atteint la case de fin
  * Cela retire un point de vie si c'est le cas
  */
@@ -162,7 +148,7 @@ pub fn detect_enemy_endzone(
 /**
  * Despawn les ennemies s'ils vont en dehors de la fenêtre
  */
-pub fn despawn_enemies (
+pub fn enemy_mov (
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut enemy_query: Query<(Entity, &mut Transform, &Enemy)>,
