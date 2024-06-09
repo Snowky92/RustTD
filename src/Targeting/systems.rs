@@ -15,7 +15,7 @@ pub fn tracking_target(
 ) {
     for (turret_entity, turret_transform , mut turret) in turrets_query.iter_mut() {
         let mut direction: Vec3 = Vec3::ZERO;
-        let mut closer: f32 = REACH_F;
+        let mut closer: f32 = turret.reach;
         let mut in_range = false;
         
         for enemy_transform in enemies_query.iter() {
@@ -29,7 +29,7 @@ pub fn tracking_target(
             }
         }
 
-        if in_range && closer < REACH_F {
+        if in_range && closer < turret.reach {
             // S'il y avait un ennemi à portée
             turret.dir_look = direction;
 
