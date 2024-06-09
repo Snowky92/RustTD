@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use super::components::*;
+use super::{components::*, Points};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
@@ -11,11 +11,10 @@ use std::io::BufReader;
 */
 pub fn load_map(
     mut commands: Commands,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
+    mut points: ResMut<Points>,
 ) {
-    let file_path = "map.json";
-    let mut start = (0.0, 0.0);
-    let mut end = (0.0, 0.0);
+    let file_path = "map2.json";
     match read_json_file(file_path) {
         Ok(map) => {
             for (i, inner_vec) in map.cases.iter().enumerate() {
@@ -23,12 +22,12 @@ pub fn load_map(
 
                     // Si point de départ
                     if value == 0 {
-                        start = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
+                        points.start = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
                     }
 
                     // Si point de fin
                     if value == 1 {
-                        end = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
+                        points.end = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
                     }
                                        
                     let tile_path = match value {
@@ -48,11 +47,6 @@ pub fn load_map(
                     });
                 }
             };
-
-            commands.spawn(Points {
-                start,
-                end
-            });
         },
         Err(e) => println!("Error reading JSON file: {}", e)
     }
