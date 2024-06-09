@@ -140,10 +140,10 @@ pub fn mov_bullets (
 pub fn hit_enemies (
     mut commands: Commands,
     bullets_query: Query<(Entity, &Transform, &Bullet), With<Bullet>>,
-    mut enemy_query: Query<(Entity, &Transform, &mut Enemy, &Children), With<Enemy>>,
+    mut enemy_query: Query<(Entity, &Transform, &mut Enemy), With<Enemy>>,
 ) {
     for (bullet_entity, bullet_transform, bullet) in bullets_query.iter() {
-        for (enemy_entity, &enemy_transform, mut enemy, children) in enemy_query.iter_mut() {
+        for (enemy_entity, &enemy_transform, mut enemy) in enemy_query.iter_mut() {
 
             let distance = bullet_transform.translation.distance(enemy_transform.translation);
 
