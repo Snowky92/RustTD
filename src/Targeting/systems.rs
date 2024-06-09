@@ -1,6 +1,6 @@
-use std::f32::consts::FRAC_PI_2;
+use std::{f32::consts::FRAC_PI_2, process::Child};
 
-use bevy::{ecs::entity, prelude::*, transform::commands, window::PrimaryWindow};
+use bevy::{ecs::entity, prelude::*, transform::{self, commands}, window::PrimaryWindow};
 
 use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{self, components::Turrets, BULLET_DAMAGE_F, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
 use super::{components::*, BULLET_SIZE};
@@ -134,14 +134,18 @@ pub fn mov_bullets (
     }
 }
 
-
+/**
+ * Détecte la collision entre les balles et les ennemis
+ */
 pub fn hit_enemies (
     mut commands: Commands,
     bullets_query: Query<(Entity, &Transform, &Bullet), With<Bullet>>,
-    mut enemy_query: Query<(Entity, &Transform, &mut Enemy), With<Enemy>>,
+    mut enemy_query: Query<(Entity, &Transform, &mut Enemy, &Children), With<Enemy>>,
 ) {
-    for (bullet_entity, &bullet_transform, bullet) in bullets_query.iter() {
-        for (enemy_entity, &enemy_transform, mut enemy) in enemy_query.iter_mut() {
+    let mut hits: Vec<(Entity, Entity, f32, Vec<Entity>)> = Vec::new();
+
+    for (bullet_entity, bullet_transform, bullet) in bullets_query.iter() {
+        for (enemy_entity, &enemy_transform, mut enemy, children) in enemy_query.iter_mut() {
 
             let distance = bullet_transform.translation.distance(enemy_transform.translation);
 
@@ -153,10 +157,10 @@ pub fn hit_enemies (
                 // Touché !
                 enemy.pv -= bullet.damage;
                 commands.entity(bullet_entity).despawn();
-
+                
                 if enemy.pv <= 0.0 {
                     // Boum
-                    commands.entity(enemy_entity).despawn();
+                    commands.entity(enemy_entity).despawn_recursive();
                 }
                 break;
             }
@@ -164,7 +168,26 @@ pub fn hit_enemies (
     }
 }
 
+pub fn update_health_bar(
+    mut health_bar_query: Query<(&Parent, &mut Transform, &HealthBar), With<HealthBar>>,
+    parent_query: Query<&Enemy, With<Enemy>>
+) {
+    for (parent, mut health_transform, health_bar) in health_bar_query.iter_mut() {
+        let entity = parent.get();
+        let Ok(enemy) = parent_query.get(entity) else {
+            continue;
+        };
 
+        let percent = enemy.pv / health_bar.max;
+
+        health_transform.scale.x = percent;
+    }
+}
+
+
+/**
+ * Gère le cooldown des tourelles, le fait réduire et retire le tag s'il est arrivé au bout
+ */
 pub fn handle_cooldown(
     mut commands: Commands,
     mut turrets_query: Query<(&mut Turrets, Entity), (With<Turrets>, With<InCooldown>)>,

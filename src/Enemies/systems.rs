@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy::render::view::window;
+use bevy::sprite::MaterialMesh2dBundle;
 use bevy::window::PrimaryWindow;
 use rand::random;
 
-use super::{Difficulty, ENEMY_PV_1, ENEMY_PV_2, ENEMY_SIZE, ENEMY_SPEED, ENEMY_SPEED_1, ENEMY_SPEED_2}; 
+use super::{Difficulty, ENEMY_PV_1, ENEMY_PV_2, ENEMY_SIZE, ENEMY_SPEED, ENEMY_SPEED_1, ENEMY_SPEED_2, HEALTH_BAR_SIZE}; 
 use super::components::*;
 
 
@@ -15,14 +16,20 @@ pub fn spawn_enemies(
     window_query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>,
     mut difficulty: ResMut<Difficulty>, 
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let window = window_query.get_single().unwrap();
 
     let random = random::<f32>() * 100.0; // Random 0 à 100
 
+    let enemy_entity;
+
+    let mut max_pv: f32 = 0.0;
+
     if random > difficulty.level as f32 {
         // Spawn ennemi n1
-        commands.spawn((
+        enemy_entity = commands.spawn((
             SpriteBundle {
                 transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
                 texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile245.png"),
@@ -37,10 +44,11 @@ pub fn spawn_enemies(
                 pv: ENEMY_PV_1,
                 speed: ENEMY_SPEED_1,
             }
-        ));
+        )).id();
+        max_pv = ENEMY_PV_1;
     } else {
         // Spawn ennemi n2
-        commands.spawn((
+        enemy_entity = commands.spawn((
             SpriteBundle {
                 transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
                 texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile246.png"),
@@ -55,8 +63,25 @@ pub fn spawn_enemies(
                 pv: ENEMY_PV_2,
                 speed: ENEMY_SPEED_2,
             }
-        ));
+        )).id();
+        max_pv = ENEMY_PV_2;
     }
+
+    let health_bar_entity = commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: meshes
+                .add(Rectangle::new(HEALTH_BAR_SIZE, 2.0))
+                .into(),
+            material: materials.add(ColorMaterial::from(Color::RED)),
+            transform: Transform::from_translation(Vec3::new(0.0, -(ENEMY_SIZE / 3.0), 1.0)),
+            ..default()
+        },
+        HealthBar {
+            max: max_pv
+        }
+    )).id();
+
+    commands.entity(enemy_entity).add_child(health_bar_entity);
 
     difficulty.level += 1;
 }
@@ -82,7 +107,7 @@ pub fn enemy_mov (
             transform.translation.y > window.height() ||
             transform.translation.y < 0.0 {
     
-            commands.entity(entity).despawn();
+            commands.entity(entity).despawn_recursive();
         }  
     }
 }

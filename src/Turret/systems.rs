@@ -46,7 +46,7 @@ pub fn handle_right_clicks(
                 const DEBUG: bool = true;
                 if toggles.turret_1 {
                     // Tour n1                    
-                    commands.spawn((
+                    let turret = commands.spawn((
                         SpriteBundle {
                             transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
                             texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
@@ -66,22 +66,23 @@ pub fn handle_right_clicks(
                         },
                         Clickable,
                         Tfast
-                    ));
+                    )).id();
 
                     if DEBUG {
-                        commands.spawn((
+                        let zone = commands.spawn((
                             MaterialMesh2dBundle {
-                                transform: Transform::from_xyz(world_position.x, world_position.y, 1.0),
+                                transform: Transform::from_xyz(0.0, 0.0, -1.0),
                                 mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
                                 material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
                                 ..default()
                             },
                             Clickable,
-                        ));
+                        )).id();
+                        commands.entity(turret).add_child(zone);
                     }
                 }else if toggles.turret_2 {
                     // Tour n2
-                    commands.spawn((
+                    let turret = commands.spawn((
                         SpriteBundle {
                             transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
                             texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
@@ -101,18 +102,19 @@ pub fn handle_right_clicks(
                         },
                         Clickable,
                         Tslow
-                    ));
+                    )).id();
 
                     if DEBUG {
-                        commands.spawn((
+                        let zone = commands.spawn((
                             MaterialMesh2dBundle {
-                                transform: Transform::from_xyz(world_position.x, world_position.y, 1.0),
+                                transform: Transform::from_xyz(0.0, 0.0, -1.0),
                                 mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_S })),
                                 material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
                                 ..default()
                             },
                             Clickable,
-                        ));
+                        )).id();
+                        commands.entity(turret).add_child(zone);
                     }
                 }
             }
@@ -151,7 +153,7 @@ pub fn handle_left_clicks(
                     && world_position.y > min_bounds.y
                     && world_position.y < max_bounds.y
                     {
-                        commands.entity(entity).despawn();
+                        commands.entity(entity).despawn_recursive();
                     }
                 }
             }

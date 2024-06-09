@@ -7,3 +7,8 @@ pub struct Enemy {
     pub pv: f32,
     pub speed: f32,
 }
+
+#[derive(Component)]
+pub struct HealthBar {
+    pub max: f32
+}
