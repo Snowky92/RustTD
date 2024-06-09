@@ -5,8 +5,20 @@ use bevy::window::PrimaryWindow;
 use rand::random;
 
 use super::{Difficulty, ENEMY_PV_1, ENEMY_PV_2, ENEMY_SIZE, ENEMY_SPEED, ENEMY_SPEED_1, ENEMY_SPEED_2, HEALTH_BAR_SIZE}; 
+use crate::GameState;
+use crate::Map::components::Points;
+
 use super::components::*;
 
+
+pub fn detect_count_init(
+    mut commands: Commands
+) {
+    commands.spawn(DetectCount {
+        maxCountBeforeDeath: 3,
+        currentCount: 0
+    });
+}
 
 /**
  * Fait spawn des ennemis
@@ -43,6 +55,7 @@ pub fn spawn_enemies(
                 direction: Vec2::new(1.0, 0.0),
                 pv: ENEMY_PV_1,
                 speed: ENEMY_SPEED_1,
+                enemy_type: 1
             }
         )).id();
         max_pv = ENEMY_PV_1;
@@ -62,6 +75,7 @@ pub fn spawn_enemies(
                 direction: Vec2::new(1.0, 0.0),
                 pv: ENEMY_PV_2,
                 speed: ENEMY_SPEED_2,
+                enemy_type: 2
             }
         )).id();
         max_pv = ENEMY_PV_2;
@@ -90,6 +104,65 @@ pub fn spawn_enemies(
  * Déplace les ennemis à chaque frame dans la direction où ils vont
  */
 pub fn enemy_mov (
+    mut enemy_query: Query<(&mut Transform, &Enemy)>,
+    time: Res<Time>
+) {
+    for (mut transform, enemy) in enemy_query.iter_mut() {
+        let direction = Vec3::new(enemy.direction.x, enemy.direction.y, 0.0);
+        transform.translation += direction * ENEMY_SPEED * time.delta_seconds();
+    }
+}
+
+
+/**
+ * Permet de supprimer l'ennemi qui a atteint la case de fin
+ * Cela retire un point de vie si c'est le cas
+ */
+pub fn detect_enemy_endzone(
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<GameState>>,
+    enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+    mut detectCount_query: Query<&mut DetectCount>,
+    points: Query<&Points>
+) {
+    let mut counter = detectCount_query.get_single_mut().unwrap();
+
+    for (enemy_entity, transform) in enemy_query.iter() {
+        if transform.translation.x >= points.single().end.0 && transform.translation.y >= points.single().end.1 {
+            commands.entity(enemy_entity).despawn();
+
+            counter.currentCount += 1;
+
+            if counter.currentCount == counter.maxCountBeforeDeath {
+                next_state.set(GameState::Paused);
+                commands.spawn(
+                    
+                    TextBundle::from_section(
+                        
+                        "Vous avez perdu !",
+                        TextStyle {
+                            font_size: 100.0,
+                            ..default()
+                        },
+                    )
+                    .with_text_justify(JustifyText::Center)
+                    
+                    .with_style(Style {
+                        width: Val::Percent(100.),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    })
+                );
+            }
+        }
+    }
+}
+
+/**
+ * Despawn les ennemies s'ils vont en dehors de la fenêtre
+ */
+pub fn despawn_enemies (
     mut commands: Commands,
     window_query: Query<&Window, With<PrimaryWindow>>,
     mut enemy_query: Query<(Entity, &mut Transform, &Enemy)>,
@@ -111,3 +184,11 @@ pub fn enemy_mov (
         }  
     }
 }
+
+// pub fn detect_enemy_endzone(
+//     mut detectCount_query: Query<&mut DetectCount>
+// ) {
+//     let mut counter = detectCount_query.get_single_mut().unwrap();
+
+//     counter.currentCount += 1;
+// }

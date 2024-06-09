@@ -4,6 +4,7 @@
 
 use std::process::Command;
 
+use bevy::input::keyboard::{Key, KeyboardInput};
 use bevy::log::tracing_subscriber::filter;
 use bevy::window::{PrimaryWindow, WindowMode, WindowResolution};
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
@@ -15,8 +16,12 @@ mod Map;
 use Turret::components::Turrets;
 use Turret::{TurretPlugin, BULLET_DAMAGE_F, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
 mod Turret;
+
 use Enemies::EnemiesPlugin;
 use Targeting::TargetingPlugin;
+
+use Money::MoneyPlugin;
+mod Money;
 
 mod Enemies;
 mod Targeting;
@@ -35,12 +40,20 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(TurretPlugin)
-        .add_plugins(EnemiesPlugin)
-        .add_plugins(TargetingPlugin)
+        .add_plugins(TurretPlugin {
+            state: GameState::Playing
+        })
+        .add_plugins(EnemiesPlugin {
+            state: GameState::Playing
+        })
+        .add_plugins(TargetingPlugin {
+            state: GameState::Playing
+        })
         .add_systems(Startup, spawn_camera)
+        .add_systems(Update, pause_system)
         //.add_systems(Startup, spawn_test_turret)
         .add_plugins(MapPlugin)
+        .insert_state(GameState::Playing)
         .run();
 }
 
@@ -125,3 +138,22 @@ pub struct DebugText;
 //     ));
 
 // }
+
+#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+enum GameState {
+    Playing,
+    Paused,
+}
+
+pub fn pause_system(
+    state: Res<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>
+) {
+    if keyboard_input.just_pressed(KeyCode::KeyP) {
+        match state.get() {
+            GameState::Playing => next_state.set(GameState::Paused),
+            GameState::Paused => next_state.set(GameState::Playing)
+        }
+    }
+}

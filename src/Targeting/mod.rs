@@ -10,16 +10,19 @@ mod systems;
 
 pub const BULLET_SIZE: f32 = TURRET_SIZE / 4.0 * 3.0;
 
+pub struct TargetingPlugin<S: States> {
+    pub state: S,
+}
 
-pub struct TargetingPlugin;
-
-impl Plugin for TargetingPlugin {
+impl<S: States> Plugin for TargetingPlugin<S> {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(Update, (tracking_target, mov_turret).chain())
-            .add_systems(Update, (shoot, handle_cooldown).chain())
-            .add_systems(Update, mov_bullets)
-            .add_systems(Update, (hit_enemies, update_health_bar).chain())
+            .add_systems(Update, (tracking_target.run_if(in_state(self.state.clone())), mov_turret.run_if(in_state(self.state.clone()))).chain())
+            .add_systems(Update, shoot.run_if(in_state(self.state.clone())))
+            .add_systems(Update, handle_cooldown.run_if(in_state(self.state.clone())))
+            .add_systems(Update, mov_bullets.run_if(in_state(self.state.clone())))
+            .add_systems(Update, hit_enemies.run_if(in_state(self.state.clone())))
+            .add_systems(Update, update_health_bar.run_if(in_state(self.state.clone())))
             ;            
     }
 }

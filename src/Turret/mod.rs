@@ -9,16 +9,18 @@ use systems::*;
 
 use crate::Enemies::ENEMY_SPEED;
 
-pub struct TurretPlugin;
+pub struct TurretPlugin<S: States> {
+    pub state: S,
+}
 
-impl Plugin for TurretPlugin {
+impl<S: States> Plugin for TurretPlugin<S> {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<TogglesTurrets>()
-            .add_systems(Update, handle_right_clicks)
-            .add_systems(Update, handle_left_clicks)
-            .add_systems(Update, handle_turret_toggle)
-            ;
+            .add_systems(Update, handle_right_clicks.run_if(in_state(self.state.clone())))
+            .add_systems(Update, handle_left_clicks.run_if(in_state(self.state.clone())))
+            .add_systems(Update, handle_turret_toggle.run_if(in_state(self.state.clone())))
+            ;            
     }
 }
 

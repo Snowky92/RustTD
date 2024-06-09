@@ -20,14 +20,22 @@ pub const ENEMY_SPEED_2: f32 = 50.0;
 
 
 
-pub struct EnemiesPlugin;
+pub const ENEMY_A_MONEY_DROP: i32 = 5;
+pub const ENEMY_B_MONEY_DROP: i32 = 10;
 
-impl Plugin for EnemiesPlugin {
+pub struct EnemiesPlugin<S: States> {
+    pub state: S,
+}
+
+impl<S: States> Plugin for EnemiesPlugin<S> {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<Difficulty>()
-            .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(1))))
-            .add_systems(Update, enemy_mov)
+            .add_systems(Startup, detect_count_init)
+            .add_systems(Update, spawn_enemies.run_if(on_timer(Duration::from_secs(1))).run_if(in_state(self.state.clone())))
+            .add_systems(Update, enemy_mov.run_if(in_state(self.state.clone())))
+            .add_systems(Update, despawn_enemies.run_if(in_state(self.state.clone())))
+            .add_systems(Update, detect_enemy_endzone)
             ;            
     }
 }
