@@ -142,8 +142,6 @@ pub fn hit_enemies (
     bullets_query: Query<(Entity, &Transform, &Bullet), With<Bullet>>,
     mut enemy_query: Query<(Entity, &Transform, &mut Enemy, &Children), With<Enemy>>,
 ) {
-    let mut hits: Vec<(Entity, Entity, f32, Vec<Entity>)> = Vec::new();
-
     for (bullet_entity, bullet_transform, bullet) in bullets_query.iter() {
         for (enemy_entity, &enemy_transform, mut enemy, children) in enemy_query.iter_mut() {
 
