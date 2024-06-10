@@ -173,45 +173,36 @@ pub fn handle_right_clicks(
     query: Query<(Entity, &Transform, &Sprite, Option<&Tslow>, Option<&Tfast>), With<Clickable>>,
     mut money: ResMut<Money>,
     q_camera: Query<(&Camera, &GlobalTransform)>,
+    cursor_world_pos: Res<CursorWorldPosition>,
 ) {
-    if mouse_button_input.just_pressed(MouseButton::Right) {
-        let window = windows.get_single().unwrap();
-        if let Some(cursor_position) = window.cursor_position() {
-            for (camera, camera_transform) in q_camera.iter() {
-                let window_size = Vec2::new(window.width() as f32, window.height() as f32);
-                let ndc = (cursor_position / window_size) * 2.0 - Vec2::ONE;
-                
-                let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
-                let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
-                
-                for (entity, transform, sprite, tslow, tfast) in query.iter() {
-                    let sprite_pos = transform.translation;
-                    let sprite_size = sprite.custom_size.unwrap();
-                    let half_size = sprite_size / 2.0;
-                    
-                    let min_bounds = sprite_pos - Vec3::new(half_size.x, half_size.y, 0.0);
-                    let max_bounds = sprite_pos + Vec3::new(half_size.x, half_size.y, 0.0);
-                    
-                    if world_position.x > min_bounds.x
-                    && world_position.x < max_bounds.x
-                    && world_position.y > min_bounds.y
-                    && world_position.y < max_bounds.y
-                    {
-                        commands.entity(entity).despawn_recursive();
-                        match (tfast, tslow) {
-                            (Some(_), None) => {
-                                money.amount += TURRET_F_COST / 2;                        
-                            }
-                            (None, Some(_)) => {
-                                money.amount += TURRET_S_COST / 2; 
-                            }
-                            _ => {
-                                 
-                            }
-                        }
-
+    let world_position = cursor_world_pos.0; 
+    if mouse_button_input.just_pressed(MouseButton::Right) {  
+        for (entity, transform, sprite, tslow, tfast) in query.iter() {
+            let sprite_pos = transform.translation;
+            let sprite_size = sprite.custom_size.unwrap();
+            let half_size = sprite_size / 2.0;
+            
+            let min_bounds = sprite_pos - Vec3::new(half_size.x, half_size.y, 0.0);
+            let max_bounds = sprite_pos + Vec3::new(half_size.x, half_size.y, 0.0);
+            
+            if world_position.x > min_bounds.x
+            && world_position.x < max_bounds.x
+            && world_position.y > min_bounds.y
+            && world_position.y < max_bounds.y
+            {
+                commands.entity(entity).despawn_recursive();
+                match (tfast, tslow) {
+                    (Some(_), None) => {
+                        money.amount += TURRET_F_COST / 2;                        
+                    }
+                    (None, Some(_)) => {
+                        money.amount += TURRET_S_COST / 2; 
+                    }
+                    _ => {
+                            
                     }
                 }
+
             }
         }
     }
