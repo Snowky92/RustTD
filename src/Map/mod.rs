@@ -16,3 +16,5 @@ impl Plugin for MapPlugin {
             .add_systems(Startup, load_map);
     }
 }
+
+pub const TILE_SIZE: f32 = 64.0;

@@ -13,3 +13,13 @@ impl Default for TogglesTurrets {
         }
     }
 }
+
+
+#[derive(Resource)]
+pub struct CursorWorldPosition (pub Vec2);
+impl Default for CursorWorldPosition {
+    fn default() -> Self {
+        CursorWorldPosition(Vec2::new(0.0, 0.0))
+    }
+}
+
