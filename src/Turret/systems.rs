@@ -48,7 +48,7 @@ pub fn calc_world_coord(
 
 pub fn handle_left_clicks(
     mut commands: Commands,
-    tiles_query: Query<&Transform, With<Tile>>,
+    tiles_query: Query<(&Transform, &Tile), With<Tile>>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -60,21 +60,25 @@ pub fn handle_left_clicks(
     if mouse_button_input.just_pressed(MouseButton::Left) {
         let world_position = cursor_world_pos.0;
 
-        let mut tile:Vec2 = Vec2::ZERO;
-        println!("{:?}", world_position);
+        let mut tile_place:Vec2 = Vec2::ZERO;
 
-        for transform_tile in tiles_query.iter() {
-            if (world_position.x >= transform_tile.translation.x && world_position.x < transform_tile.translation.x + TILE_SIZE)
-            && (world_position.y >= transform_tile.translation.y && world_position.y < transform_tile.translation.y + TILE_SIZE) {
-                println!("{:?}", transform_tile.translation);
-                tile = Vec2::new(
-                    transform_tile.translation.x + (TILE_SIZE / 2.0), 
-                    transform_tile.translation.y + (TILE_SIZE / 2.0)
-                );
+        for (transform_tile, tile) in tiles_query.iter() {
+            if (world_position.x >= transform_tile.translation.x - (TILE_SIZE / 2.0) && world_position.x < transform_tile.translation.x + (TILE_SIZE / 2.0))
+            && (world_position.y >= transform_tile.translation.y - (TILE_SIZE / 2.0) && world_position.y < transform_tile.translation.y + (TILE_SIZE / 2.0)) {
+                
+                if tile.terrain == 4 {
+                    tile_place = Vec2::new(
+                        transform_tile.translation.x, 
+                        transform_tile.translation.y 
+                    );
+                }
             }
         }
 
-        println!("{:?}", tile);
+        if tile_place == Vec2::ZERO {
+            return;
+        }
+
 
         const DEBUG: bool = true;
         if toggles.turret_1 {
@@ -84,7 +88,7 @@ pub fn handle_left_clicks(
                                 
                 let turret = commands.spawn((
                     SpriteBundle {
-                        transform: Transform::from_xyz(tile.x, tile.y, 2.0),
+                        transform: Transform::from_xyz(tile_place.x, tile_place.y, 2.0),
                         texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
                         sprite: Sprite {
                             custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
@@ -124,7 +128,7 @@ pub fn handle_left_clicks(
             
                 let turret = commands.spawn((
                     SpriteBundle {
-                        transform: Transform::from_xyz(tile.x, tile.y, 2.0),
+                        transform: Transform::from_xyz(tile_place.x, tile_place.y, 2.0),
                         texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
                         sprite: Sprite {
                             custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),

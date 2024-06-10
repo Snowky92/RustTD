@@ -7,4 +7,6 @@ pub struct Map {
 }
 
 #[derive(Component)]
-pub struct Tile;
+pub struct Tile {
+    pub terrain: usize
+}
