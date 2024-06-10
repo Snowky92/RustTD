@@ -6,3 +6,5 @@ pub struct Map {
     pub cases: Vec<Vec<i32>>
 }
 
+#[derive(Component)]
+pub struct Tile;

@@ -17,9 +17,11 @@ impl<S: States> Plugin for TurretPlugin<S> {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<TogglesTurrets>()
+            .init_resource::<CursorWorldPosition>()
             .add_systems(Update, handle_right_clicks.run_if(in_state(self.state.clone())))
             .add_systems(Update, handle_left_clicks.run_if(in_state(self.state.clone())))
             .add_systems(Update, handle_turret_toggle.run_if(in_state(self.state.clone())))
+            .add_systems(Update, calc_world_coord.run_if(in_state(self.state.clone())))
             ;            
     }
 }

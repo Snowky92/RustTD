@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use super::{components::*, Points};
+use super::{components::*, Points, TILE_SIZE};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
@@ -22,12 +22,12 @@ pub fn load_map(
 
                     // Si point de départ
                     if value == 0 {
-                        points.start = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
+                        points.start = ((j as f32 * TILE_SIZE + 32.0), (i as f32 * TILE_SIZE + 64.0));
                     }
 
                     // Si point de fin
                     if value == 1 {
-                        points.end = ((j as f32 * 64.0 + 32.0), (i as f32 * 64.0 + 64.0));
+                        points.end = ((j as f32 * TILE_SIZE + 32.0), (i as f32 * TILE_SIZE + 64.0));
                     }
                                        
                     let tile_path = match value {
@@ -38,13 +38,16 @@ pub fn load_map(
                         _ => "sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile093.png"
                     };
 
-                    let transform = Transform::from_xyz(j as f32  * 64.0 + 32.0, i as f32 * 64.0 + 64.0, 0.0);
+                    let transform = Transform::from_xyz(j as f32  * TILE_SIZE + 32.0, i as f32 * TILE_SIZE + 64.0, 0.0);
 
-                    commands.spawn(SpriteBundle {
-                        transform,
-                        texture: asset_server.load(tile_path),
-                        ..default()
-                    });
+                    commands.spawn((
+                        SpriteBundle {
+                            transform,
+                            texture: asset_server.load(tile_path),
+                            ..default()
+                        }, 
+                        Tile,
+                    ));
                 }
             };
         },

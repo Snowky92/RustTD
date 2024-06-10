@@ -1,9 +1,9 @@
 use bevy::{prelude::*, sprite::{MaterialMesh2dBundle, Mesh2dHandle}, window::PrimaryWindow};
 
 
-use crate::{Money::resources::Money, Turret::{BULLET_DAMAGE_F, BULLET_DAMAGE_S, BULLET_SPEED_S, COOLDOWN_S, REACH_S, TURRET_F_COST, TURRET_S_COST}};
+use crate::{Map::{components::Tile, TILE_SIZE}, Money::resources::Money, Turret::{BULLET_DAMAGE_F, BULLET_DAMAGE_S, BULLET_SPEED_S, COOLDOWN_S, REACH_S, TURRET_F_COST, TURRET_S_COST}};
 
-use super::{components::*, TogglesTurrets, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
+use super::{components::*, CursorWorldPosition, TogglesTurrets, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
 
 pub fn handle_turret_toggle(
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -24,115 +24,145 @@ pub fn handle_turret_toggle(
     }
 }
 
-pub fn handle_right_clicks(
-    mut commands: Commands,
-    mouse_button_input: Res<ButtonInput<MouseButton>>,
+pub fn calc_world_coord(
     windows: Query<&Window, With<PrimaryWindow>>,
-    q_camera: Query<(&Camera, &GlobalTransform)>,
+    camera_query: Query<(&Camera, &GlobalTransform)>,
+    mut cursor_world_pos: ResMut<CursorWorldPosition>,
+) {
+    let window = windows.get_single().unwrap();
+    
+    if let Some(mut screen_pos) = window.cursor_position() {
+        for (camera, camera_transform) in camera_query.iter() {
+
+            screen_pos.y = window.height() - screen_pos.y; 
+          
+            let window_size = Vec2::new(window.width() as f32, window.height() as f32);
+            let ndc = (screen_pos / window_size) * 2.0 - Vec2::ONE;
+            let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
+            let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
+            
+            cursor_world_pos.0 = world_position;
+        }
+    }
+}
+
+pub fn handle_left_clicks(
+    mut commands: Commands,
+    tiles_query: Query<&Transform, With<Tile>>,
+    mouse_button_input: Res<ButtonInput<MouseButton>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut money: ResMut<Money>,
     asset_server: Res<AssetServer>,
-    toggles: Res<TogglesTurrets>
+    toggles: Res<TogglesTurrets>,
+    cursor_world_pos: Res<CursorWorldPosition>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
-        let window = windows.get_single().unwrap();
-        for (camera, camera_transform) in q_camera.iter() {
-            if let Some(cursor_position) = window.cursor_position() {
-                let window_size = Vec2::new(window.width() as f32, window.height() as f32);
-                let ndc = (cursor_position / window_size) * 2.0 - Vec2::ONE;
-                let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
-                let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
+        let world_position = cursor_world_pos.0;
 
-                const DEBUG: bool = true;
-                if toggles.turret_1 {
-                    // Tour n1 
-                    if money.amount >= TURRET_F_COST {
-                        money.amount -= TURRET_F_COST;
-                                     
-                        let turret = commands.spawn((
-                            SpriteBundle {
-                                transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
-                                texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
-                                    ..default()
-                                },
-                                ..default()
-                            },
-                            Turrets {
-                                dir_look: Vec3::new(0.0, 0.0, 0.0),
-                                b_speed: BULLET_SPEED_F,
-                                cooldown: COOLDOWN_F,
-                                cooldown_max: COOLDOWN_F,
-                                reach: REACH_F,
-                                b_damage: BULLET_DAMAGE_F,
-                            },
-                            Clickable,
-                            Tfast
-                        )).id();
+        let mut tile:Vec2 = Vec2::ZERO;
+        println!("{:?}", world_position);
 
-                        if DEBUG {
-                            let zone = commands.spawn((
-                                MaterialMesh2dBundle {
-                                    transform: Transform::from_xyz(0.0, 0.0, -1.0),
-                                    mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
-                                    material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
-                                    ..default()
-                                },
-                                Clickable,
-                            )).id();
-                            commands.entity(turret).add_child(zone);
-                        }
-                    }
-                }else if toggles.turret_2 {
-                    // Tour n2
-                    if money.amount >= TURRET_S_COST {
-                        money.amount -= TURRET_S_COST;
-                    
-                        let turret = commands.spawn((
-                            SpriteBundle {
-                                transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
-                                texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
-                                sprite: Sprite {
-                                    custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
-                                    ..default()
-                                },
-                                ..default()
-                            },
-                            Turrets {
-                                dir_look: Vec3::new(0.0, 0.0, 0.0),
-                                b_speed: BULLET_SPEED_S,
-                                cooldown: COOLDOWN_S,
-                                cooldown_max: COOLDOWN_S,
-                                reach: REACH_S,
-                                b_damage: BULLET_DAMAGE_S,
-                            },
-                            Clickable,
-                            Tslow
-                        )).id();
+        for transform_tile in tiles_query.iter() {
+            if (world_position.x >= transform_tile.translation.x && world_position.x < transform_tile.translation.x + TILE_SIZE)
+            && (world_position.y >= transform_tile.translation.y && world_position.y < transform_tile.translation.y + TILE_SIZE) {
+                println!("{:?}", transform_tile.translation);
+                tile = Vec2::new(
+                    transform_tile.translation.x + (TILE_SIZE / 2.0), 
+                    transform_tile.translation.y + (TILE_SIZE / 2.0)
+                );
+            }
+        }
 
-                        if DEBUG {
-                            let zone = commands.spawn((
-                                MaterialMesh2dBundle {
-                                    transform: Transform::from_xyz(0.0, 0.0, -1.0),
-                                    mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_S })),
-                                    material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
-                                    ..default()
-                                },
-                                Clickable,
-                            )).id();
-                            commands.entity(turret).add_child(zone);
-                        }
-                    }
+        println!("{:?}", tile);
+
+        const DEBUG: bool = true;
+        if toggles.turret_1 {
+            // Tour n1 
+            if money.amount >= TURRET_F_COST {
+                money.amount -= TURRET_F_COST;
+                                
+                let turret = commands.spawn((
+                    SpriteBundle {
+                        transform: Transform::from_xyz(tile.x, tile.y, 2.0),
+                        texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
+                        sprite: Sprite {
+                            custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    Turrets {
+                        dir_look: Vec3::new(0.0, 0.0, 0.0),
+                        b_speed: BULLET_SPEED_F,
+                        cooldown: COOLDOWN_F,
+                        cooldown_max: COOLDOWN_F,
+                        reach: REACH_F,
+                        b_damage: BULLET_DAMAGE_F,
+                    },
+                    Clickable,
+                    Tfast
+                )).id();
+
+                if DEBUG {
+                    let zone = commands.spawn((
+                        MaterialMesh2dBundle {
+                            transform: Transform::from_xyz(0.0, 0.0, -1.0),
+                            mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
+                            material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
+                            ..default()
+                        },
+                        Clickable,
+                    )).id();
+                    commands.entity(turret).add_child(zone);
                 }
             }
-        } 
+        }else if toggles.turret_2 {
+            // Tour n2
+            if money.amount >= TURRET_S_COST {
+                money.amount -= TURRET_S_COST;
+            
+                let turret = commands.spawn((
+                    SpriteBundle {
+                        transform: Transform::from_xyz(tile.x, tile.y, 2.0),
+                        texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
+                        sprite: Sprite {
+                            custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    Turrets {
+                        dir_look: Vec3::new(0.0, 0.0, 0.0),
+                        b_speed: BULLET_SPEED_S,
+                        cooldown: COOLDOWN_S,
+                        cooldown_max: COOLDOWN_S,
+                        reach: REACH_S,
+                        b_damage: BULLET_DAMAGE_S,
+                    },
+                    Clickable,
+                    Tslow
+                )).id();
+
+                if DEBUG {
+                    let zone = commands.spawn((
+                        MaterialMesh2dBundle {
+                            transform: Transform::from_xyz(0.0, 0.0, -1.0),
+                            mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_S })),
+                            material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
+                            ..default()
+                        },
+                        Clickable,
+                    )).id();
+                    commands.entity(turret).add_child(zone);
+                }
+            }
+        }
     } 
 }
 
 
-pub fn handle_left_clicks(
+pub fn handle_right_clicks(
     mut commands: Commands,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window, With<PrimaryWindow>>,
