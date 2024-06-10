@@ -136,7 +136,8 @@ pub fn handle_left_clicks(
     mut commands: Commands,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    query: Query<(Entity, &Transform, &Sprite), With<Clickable>>,
+    query: Query<(Entity, &Transform, &Sprite, Option<&Tslow>, Option<&Tfast>), With<Clickable>>,
+    mut money: ResMut<Money>,
     q_camera: Query<(&Camera, &GlobalTransform)>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Right) {
@@ -149,7 +150,7 @@ pub fn handle_left_clicks(
                 let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
                 let world_position = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
                 
-                for (entity, transform, sprite) in query.iter() {
+                for (entity, transform, sprite, tslow, tfast) in query.iter() {
                     let sprite_pos = transform.translation;
                     let sprite_size = sprite.custom_size.unwrap();
                     let half_size = sprite_size / 2.0;
@@ -163,6 +164,18 @@ pub fn handle_left_clicks(
                     && world_position.y < max_bounds.y
                     {
                         commands.entity(entity).despawn_recursive();
+                        match (tfast, tslow) {
+                            (Some(_), None) => {
+                                money.amount += TURRET_F_COST / 2;                        
+                            }
+                            (None, Some(_)) => {
+                                money.amount += TURRET_S_COST / 2; 
+                            }
+                            _ => {
+                                 
+                            }
+                        }
+
                     }
                 }
             }

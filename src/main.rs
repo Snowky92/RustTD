@@ -50,11 +50,12 @@ fn main() {
             state: GameState::Playing
         })
         .add_systems(Startup, spawn_camera)
+        .add_systems(Startup, keyinput_ui_setup)
         .add_systems(Update, pause_system)
         //.add_systems(Startup, spawn_test_turret)
         .add_plugins(MapPlugin)
         .add_plugins(MoneyPlugin)
-        .insert_state(GameState::Playing)
+        .insert_state(GameState::Paused)
         .run();
 }
 
@@ -67,6 +68,106 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
     });
 }
 
+pub fn keyinput_ui_setup(mut commands: Commands) {
+
+    // TOUCHES
+    commands.spawn(
+        TextBundle::from_section("TOUCHES", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(10.0),
+            right: Val::Px(40.0),
+            ..default()
+        })
+    );
+
+    // Touche 1 -> Tourelle 1
+    commands.spawn(
+        TextBundle::from_section("1 - Tourelle 1", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(70.0),
+            right: Val::Px(10.0),
+            ..default()
+        })
+    );
+    // Touche 2 -> Tourelle 2
+    commands.spawn(
+        TextBundle::from_section("2 - Tourelle 2", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(130.0),
+            right: Val::Px(10.0),
+            ..default()
+        })
+    );
+    // Touche P -> Pause
+    commands.spawn(
+        TextBundle::from_section("P - Pause", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(240.0),
+            right: Val::Px(10.0),
+            ..default()
+        })
+    );
+    // Placer une tour
+    commands.spawn(
+        TextBundle::from_section("Clic gauche", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(300.0),
+            right: Val::Px(10.0),
+            ..default()
+        })
+    );
+
+    commands.spawn(
+        TextBundle::from_section("Placer une tour", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(330.0),
+            right: Val::Px(10.0),
+            ..default()
+        })
+    );
+    // Détruire une tour
+    commands.spawn(
+        TextBundle::from_section("Clic droit", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(400.0),
+            right: Val::Px(10.0),
+            ..default()
+        })
+    );
+
+    commands.spawn(
+        TextBundle::from_section("Detruire une tour", TextStyle {
+            font_size: 30.0,
+            ..default()
+        }).with_style(Style {
+            position_type: PositionType::Absolute,
+            top: Val::Px(430.0),
+            right: Val::Px(10.0),
+            ..default()
+        })
+    );
+}
 
 
 // #[derive(Component)]
