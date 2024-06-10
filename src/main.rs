@@ -53,6 +53,7 @@ fn main() {
         .add_systems(Update, pause_system)
         //.add_systems(Startup, spawn_test_turret)
         .add_plugins(MapPlugin)
+        .add_plugins(MoneyPlugin)
         .insert_state(GameState::Playing)
         .run();
 }

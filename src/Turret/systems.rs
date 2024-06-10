@@ -1,7 +1,7 @@
 use bevy::{prelude::*, sprite::{MaterialMesh2dBundle, Mesh2dHandle}, window::PrimaryWindow};
 
 
-use crate::Turret::{BULLET_DAMAGE_F, BULLET_DAMAGE_S, BULLET_SPEED_S, COOLDOWN_S, REACH_S};
+use crate::{Money::resources::Money, Turret::{BULLET_DAMAGE_F, BULLET_DAMAGE_S, BULLET_SPEED_S, COOLDOWN_S, REACH_S, TURRET_F_COST, TURRET_S_COST}};
 
 use super::{components::*, TogglesTurrets, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
 
@@ -31,6 +31,7 @@ pub fn handle_right_clicks(
     q_camera: Query<(&Camera, &GlobalTransform)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut money: ResMut<Money>,
     asset_server: Res<AssetServer>,
     toggles: Res<TogglesTurrets>
 ) {
@@ -45,76 +46,84 @@ pub fn handle_right_clicks(
 
                 const DEBUG: bool = true;
                 if toggles.turret_1 {
-                    // Tour n1                    
-                    let turret = commands.spawn((
-                        SpriteBundle {
-                            transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
-                            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
-                            sprite: Sprite {
-                                custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                    // Tour n1 
+                    if money.amount >= TURRET_F_COST {
+                        money.amount -= TURRET_F_COST;
+                                     
+                        let turret = commands.spawn((
+                            SpriteBundle {
+                                transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
+                                texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
+                                sprite: Sprite {
+                                    custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                                    ..default()
+                                },
                                 ..default()
                             },
-                            ..default()
-                        },
-                        Turrets {
-                            dir_look: Vec3::new(0.0, 0.0, 0.0),
-                            b_speed: BULLET_SPEED_F,
-                            cooldown: COOLDOWN_F,
-                            cooldown_max: COOLDOWN_F,
-                            reach: REACH_F,
-                            b_damage: BULLET_DAMAGE_F,
-                        },
-                        Clickable,
-                        Tfast
-                    )).id();
-
-                    if DEBUG {
-                        let zone = commands.spawn((
-                            MaterialMesh2dBundle {
-                                transform: Transform::from_xyz(0.0, 0.0, -1.0),
-                                mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
-                                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
-                                ..default()
+                            Turrets {
+                                dir_look: Vec3::new(0.0, 0.0, 0.0),
+                                b_speed: BULLET_SPEED_F,
+                                cooldown: COOLDOWN_F,
+                                cooldown_max: COOLDOWN_F,
+                                reach: REACH_F,
+                                b_damage: BULLET_DAMAGE_F,
                             },
                             Clickable,
+                            Tfast
                         )).id();
-                        commands.entity(turret).add_child(zone);
+
+                        if DEBUG {
+                            let zone = commands.spawn((
+                                MaterialMesh2dBundle {
+                                    transform: Transform::from_xyz(0.0, 0.0, -1.0),
+                                    mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
+                                    material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
+                                    ..default()
+                                },
+                                Clickable,
+                            )).id();
+                            commands.entity(turret).add_child(zone);
+                        }
                     }
                 }else if toggles.turret_2 {
                     // Tour n2
-                    let turret = commands.spawn((
-                        SpriteBundle {
-                            transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
-                            texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
-                            sprite: Sprite {
-                                custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                    if money.amount >= TURRET_S_COST {
+                        money.amount -= TURRET_S_COST;
+                    
+                        let turret = commands.spawn((
+                            SpriteBundle {
+                                transform: Transform::from_xyz(world_position.x, world_position.y, 2.0),
+                                texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile250.png"),
+                                sprite: Sprite {
+                                    custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
+                                    ..default()
+                                },
                                 ..default()
                             },
-                            ..default()
-                        },
-                        Turrets {
-                            dir_look: Vec3::new(0.0, 0.0, 0.0),
-                            b_speed: BULLET_SPEED_S,
-                            cooldown: COOLDOWN_S,
-                            cooldown_max: COOLDOWN_S,
-                            reach: REACH_S,
-                            b_damage: BULLET_DAMAGE_S,
-                        },
-                        Clickable,
-                        Tslow
-                    )).id();
-
-                    if DEBUG {
-                        let zone = commands.spawn((
-                            MaterialMesh2dBundle {
-                                transform: Transform::from_xyz(0.0, 0.0, -1.0),
-                                mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_S })),
-                                material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
-                                ..default()
+                            Turrets {
+                                dir_look: Vec3::new(0.0, 0.0, 0.0),
+                                b_speed: BULLET_SPEED_S,
+                                cooldown: COOLDOWN_S,
+                                cooldown_max: COOLDOWN_S,
+                                reach: REACH_S,
+                                b_damage: BULLET_DAMAGE_S,
                             },
                             Clickable,
+                            Tslow
                         )).id();
-                        commands.entity(turret).add_child(zone);
+
+                        if DEBUG {
+                            let zone = commands.spawn((
+                                MaterialMesh2dBundle {
+                                    transform: Transform::from_xyz(0.0, 0.0, -1.0),
+                                    mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_S })),
+                                    material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
+                                    ..default()
+                                },
+                                Clickable,
+                            )).id();
+                            commands.entity(turret).add_child(zone);
+                        }
                     }
                 }
             }

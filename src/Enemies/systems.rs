@@ -170,11 +170,3 @@ pub fn enemy_mov (
         }  
     }
 }
-
-// pub fn detect_enemy_endzone(
-//     mut detectCount_query: Query<&mut DetectCount>
-// ) {
-//     let mut counter = detectCount_query.get_single_mut().unwrap();
-
-//     counter.currentCount += 1;
-// }

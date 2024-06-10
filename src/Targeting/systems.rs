@@ -2,7 +2,7 @@ use std::{f32::consts::FRAC_PI_2, process::Child};
 
 use bevy::{ecs::entity, prelude::*, transform::{self, commands}, window::PrimaryWindow};
 
-use crate::{DebugText, Enemies::{components::*, ENEMY_SIZE, ENEMY_SPEED}, Turret::{self, components::Turrets, BULLET_DAMAGE_F, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
+use crate::{DebugText, Enemies::{components::*, ENEMY_1_MONEY_DROP, ENEMY_2_MONEY_DROP, ENEMY_SIZE, ENEMY_SPEED}, Money::resources::Money, Turret::{self, components::Turrets, BULLET_DAMAGE_F, BULLET_SPEED_F, REACH_F, TURRET_SIZE}};
 use super::{components::*, BULLET_SIZE};
 
 /**
@@ -141,6 +141,7 @@ pub fn hit_enemies (
     mut commands: Commands,
     bullets_query: Query<(Entity, &Transform, &Bullet), With<Bullet>>,
     mut enemy_query: Query<(Entity, &Transform, &mut Enemy), With<Enemy>>,
+    mut money: ResMut<Money>
 ) {
     for (bullet_entity, bullet_transform, bullet) in bullets_query.iter() {
         for (enemy_entity, &enemy_transform, mut enemy) in enemy_query.iter_mut() {
@@ -158,6 +159,12 @@ pub fn hit_enemies (
                 
                 if enemy.pv <= 0.0 {
                     // Boum
+                    if enemy.enemy_type == 1 {
+                        money.amount += ENEMY_1_MONEY_DROP;
+                    } else {
+                        money.amount += ENEMY_2_MONEY_DROP;
+                    }
+                    
                     commands.entity(enemy_entity).despawn_recursive();
                 }
                 break;

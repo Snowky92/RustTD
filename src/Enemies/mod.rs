@@ -18,10 +18,8 @@ pub const ENEMY_SPEED_1: f32 = 100.0;
 pub const ENEMY_PV_2: f32 = 200.0;
 pub const ENEMY_SPEED_2: f32 = 50.0;
 
-
-
-pub const ENEMY_A_MONEY_DROP: i32 = 5;
-pub const ENEMY_B_MONEY_DROP: i32 = 10;
+pub const ENEMY_1_MONEY_DROP: i32 = 5;
+pub const ENEMY_2_MONEY_DROP: i32 = 10;
 
 pub struct EnemiesPlugin<S: States> {
     pub state: S,
