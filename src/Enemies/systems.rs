@@ -5,8 +5,7 @@ use bevy::window::PrimaryWindow;
 use rand::random;
 
 use super::{Difficulty, ENEMY_PV_1, ENEMY_PV_2, ENEMY_SIZE, ENEMY_SPEED, ENEMY_SPEED_1, ENEMY_SPEED_2, HEALTH_BAR_SIZE}; 
-use crate::GameState;
-use crate::Map::components::Points;
+use crate::{GameState, Map::resources::Points};
 
 use super::components::*;
 
@@ -30,6 +29,7 @@ pub fn spawn_enemies(
     mut difficulty: ResMut<Difficulty>, 
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    points: Res<Points>,
 ) {
     let window = window_query.get_single().unwrap();
 
@@ -43,7 +43,7 @@ pub fn spawn_enemies(
         // Spawn ennemi n1
         enemy_entity = commands.spawn((
             SpriteBundle {
-                transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
+                transform: Transform::from_xyz(points.start.0, points.start.1, 1.0),
                 texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile245.png"),
                 sprite: Sprite {
                     custom_size: Some(Vec2::new(ENEMY_SIZE, ENEMY_SIZE)),
@@ -63,7 +63,7 @@ pub fn spawn_enemies(
         // Spawn ennemi n2
         enemy_entity = commands.spawn((
             SpriteBundle {
-                transform: Transform::from_xyz(50.0, window.height() / 2.0, 1.0),
+                transform: Transform::from_xyz(points.start.0, points.start.1, 1.0),
                 texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile246.png"),
                 sprite: Sprite {
                     custom_size: Some(Vec2::new(ENEMY_SIZE, ENEMY_SIZE)),
@@ -109,12 +109,12 @@ pub fn detect_enemy_endzone(
     mut next_state: ResMut<NextState<GameState>>,
     enemy_query: Query<(Entity, &Transform), With<Enemy>>,
     mut detectCount_query: Query<&mut DetectCount>,
-    points: Query<&Points>
+    points: Res<Points>,
 ) {
     let mut counter = detectCount_query.get_single_mut().unwrap();
 
     for (enemy_entity, transform) in enemy_query.iter() {
-        if transform.translation.x >= points.single().end.0 && transform.translation.y >= points.single().end.1 {
+        if transform.translation.x >= points.end.0 && transform.translation.y >= points.end.1 {
             commands.entity(enemy_entity).despawn();
 
             counter.currentCount += 1;
