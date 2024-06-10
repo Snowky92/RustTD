@@ -13,9 +13,9 @@ pub const ENEMY_SPEED: f32 = 200.0; // Enemy speed
 pub const ENEMY_SIZE: f32 = 60.0; 
 pub const HEALTH_BAR_SIZE: f32 = 15.0;
 
-pub const ENEMY_PV_1: f32 = 100.0;
+pub const ENEMY_PV_1: f32 = 150.0;
 pub const ENEMY_SPEED_1: f32 = 100.0;
-pub const ENEMY_PV_2: f32 = 200.0;
+pub const ENEMY_PV_2: f32 = 300.0;
 pub const ENEMY_SPEED_2: f32 = 50.0;
 
 pub const ENEMY_1_MONEY_DROP: i32 = 5;

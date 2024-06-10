@@ -14,7 +14,7 @@ use rand::random;
 use Map::MapPlugin;
 mod Map;
 use Turret::components::Turrets;
-use Turret::{TurretPlugin, BULLET_DAMAGE_F, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE};
+use Turret::{TurretPlugin, BULLET_DAMAGE_F, BULLET_SPEED_F, COOLDOWN_F, REACH_F, TURRET_SIZE, TURRET_S_COST};
 mod Turret;
 
 use Enemies::EnemiesPlugin;
@@ -85,7 +85,7 @@ pub fn keyinput_ui_setup(mut commands: Commands) {
 
     // Touche 1 -> Tourelle 1
     commands.spawn(
-        TextBundle::from_section("1 - Tourelle 1", TextStyle {
+        TextBundle::from_section("1 - Tourelle 1 : 30 G", TextStyle {
             font_size: 30.0,
             ..default()
         }).with_style(Style {
@@ -97,7 +97,7 @@ pub fn keyinput_ui_setup(mut commands: Commands) {
     );
     // Touche 2 -> Tourelle 2
     commands.spawn(
-        TextBundle::from_section("2 - Tourelle 2", TextStyle {
+        TextBundle::from_section("2 - Tourelle 2 : 50 G", TextStyle {
             font_size: 30.0,
             ..default()
         }).with_style(Style {
@@ -169,77 +169,8 @@ pub fn keyinput_ui_setup(mut commands: Commands) {
     );
 }
 
-
-// #[derive(Component)]
-// pub struct Turrets {
-//     pub dir_look: Vec3,
-// }
-
 #[derive(Component)]
 pub struct DebugText;
-
-// pub fn spawn_test_turret(
-//     mut commands: Commands,
-//     window_query: Query<&Window, With<PrimaryWindow>>,
-//     asset_server: Res<AssetServer>,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<ColorMaterial>>,
-// ) {
-//     let window = window_query.get_single().unwrap();
-
-//     let turret_x = window.width() / 4.0 ;
-//     let turret_y = (window.height() / 2.0) - 100.0;
-
-//     commands.spawn((
-//         SpriteBundle {
-//             transform: Transform::from_xyz(turret_x, turret_y, 2.0),
-//             texture: asset_server.load("sprites/kenney_tower-defense-top-down/PNG/Default size/towerDefense_tile249.png"),
-//             sprite: Sprite {
-//                 custom_size: Some(Vec2::new(TURRET_SIZE, TURRET_SIZE)),
-//                 ..default()
-//             },
-//             ..default()
-//         },
-//         Turrets {
-//             dir_look: Vec3::new(0.0, 0.0, 0.0),
-//             b_speed: BULLET_SPEED_F,
-//             cooldown: COOLDOWN_F,
-//             cooldown_max: COOLDOWN_F,
-//             reach: REACH_F,
-//             b_damage: BULLET_DAMAGE_F
-//         }
-//     ));
-
-//     commands.spawn(MaterialMesh2dBundle {
-//         transform: Transform::from_xyz(turret_x, turret_y, 0.0),
-//         mesh: Mesh2dHandle(meshes.add( Circle { radius: REACH_F })),
-//         material: materials.add(Color::rgba(0.0, 0.0, 1.0, 0.1)),
-//         ..default()
-//     });
-
-//     commands.spawn((
-//         // Create a TextBundle that has a Text with a single section.
-//         TextBundle::from_section(
-//             // Accepts a `String` or any type that converts into a `String`, such as `&str`
-//             "hello bevy!",
-//             TextStyle {
-//                 // This font is loaded and will be used instead of the default font.
-//                 font_size: 50.0,
-//                 ..default()
-//             },
-//         ) // Set the justification of the Text
-//         .with_text_justify(JustifyText::Center)
-//         // Set the style of the TextBundle itself.
-//         .with_style(Style {
-//             position_type: PositionType::Absolute,
-//             bottom: Val::Px(5.0),
-//             right: Val::Px(5.0),
-//             ..default()
-//         }),
-//         DebugText,
-//     ));
-
-// }
 
 #[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
 enum GameState {
