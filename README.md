@@ -18,3 +18,12 @@ Et attendre la petite demi-heure nécessaire à la première compilation :)
 
 ![screen1](./assets/sprites/screenshot1.png)
 ![screen1](./assets/sprites/screenshot2.png)
+
+## Ressources
+[Tainted Coders](https://taintedcoders.com/)
+
+[Unofficial cheatbook](https://bevy-cheatbook.github.io/)
+
+[Tutoriel de Guillaume Gomez - Le top du top pour apprendre le rust](https://blog.guillaume-gomez.fr/Rust/1/1) 
+
+[Tutoriel Bevy 0.10 youtube](https://www.youtube.com/watch?v=TQt-v_bFdao&list=PLVnntJRoP85JHGX7rGDu6LaF3fmDDbqyd)
